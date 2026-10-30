@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Local chat · Gemma</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='chat.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='documents.js') }}" defer></script>
+  </head>
+  <body>
+    <main class="chat">
+      <header>
+        <div><p class="eyebrow">OLLAMA / LOCAL CHAT</p><h1>Gemma <span>3 · 1B</span></h1></div>
+        <button id="clear" class="secondary" type="button">New chat</button>
+      </header>
+      <nav class="tabs" aria-label="Sections">
+        <button id="chat-tab" type="button" aria-pressed="true" aria-controls="chat-panel">Chat</button>
+        <button id="documents-tab" type="button" aria-pressed="false" aria-controls="documents-panel">Document Collection</button>
+      </nav>
+      <div id="chat-panel" class="chat-panel">
+      <section id="conversation" role="log" aria-label="Conversation" aria-live="polite">
+        <div id="welcome"><h2>What’s on your mind?</h2><p>Ask a study question about your uploaded documents.</p></div>
+      </section>
+      <p id="status" role="status"></p>
+      <p id="error" role="alert" hidden></p>
+      <form id="chat-form">
+        <label for="message">Message Gemma</label>
+        <div class="composer"><textarea id="message" rows="2" placeholder="Type a message…" required></textarea><button id="send" type="submit">Send <span aria-hidden="true">↑</span></button></div>
+        <p class="hint">Enter to send · Shift + Enter for a new line · History clears on reload</p>
+      </form>
+      </div>
+      <section id="documents-panel" class="documents-panel" aria-labelledby="documents-tab" hidden>
+        <h2>Document Collection</h2>
+        <p class="collection-description">Documents stay local. Relevant passages are sent to your local Gemma model for cited study answers.</p>
+        <form id="upload-form">
+          <label for="document-file">Choose a document</label>
+          <input id="document-file" type="file" accept=".pdf,.txt,.docx,.md" required>
+          <p class="hint">PDF, TXT, DOCX, or MD · Maximum 10 MiB per file</p>
+          <button id="upload-button" type="submit">Upload</button>
+        </form>
+        <p id="document-status" role="status"></p>
+        <p id="document-error" role="alert" hidden></p>
+        <div class="collection-heading"><h3>Uploaded documents</h3><button id="refresh-documents" class="secondary" type="button">Refresh</button></div>
+        <ul id="document-list" aria-label="Uploaded documents"></ul>
+        <p id="documents-empty" class="hint" hidden>No documents uploaded yet.</p>
+      </section>
+    </main>
+  </body>
+</html>

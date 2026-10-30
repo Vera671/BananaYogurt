@@ -1,0 +1,50 @@
+# Private document collections and local vector indexes
+uploads/
+documents/
+data/
+chroma/
+chroma_db/
+.chroma/
+vectorstore/
+vector_store/
+*.pdf
+*.docx
+*.sqlite*
+*.db
+*.db-*
+*.duckdb*
+*.faiss
+*.index
+# Markdown files are private by default; explicitly allow project documentation.
+*.md
+!README.md
+!AGENTS.md
+!docs/**/*.md
+
+# Virtual environments and generated files
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+*.log
+.DS_Store
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.secrets/
+secrets/
+*.pem
+*.key
+credentials*.json
+secrets*.json
