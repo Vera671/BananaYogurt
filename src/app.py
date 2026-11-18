@@ -200,5 +200,9 @@ def index_documents():
         raise click.ClickException("Some documents failed; fix the errors and run again.")
 
 
+@app.get("/genieai")
+def genieai():
+    return render_template("genieai.html")
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=False)

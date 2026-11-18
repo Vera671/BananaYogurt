@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GenieAi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* GenieAi: one dark crimson world, taken from the project mockups. Sidebar app shell, content in cards. */
+  --bg:#0e0a0c;
+  --panel:#171114;
+  --panel-2:#20171c;
+  --line:#33252c;
+  --text:#f5eef1;
+  --muted:#a9959e;
+  --accent:#de3561;
+  --accent-deep:#8f1239;
+  --good:#47c486;
+  --warn:#e8a93f;
+  --font-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body:"DM Sans", "Segoe UI", system-ui, sans-serif;
+  --r:14px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:26px;font-weight:600}
+h2{font-size:18px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ic{flex:none;display:block}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.tiny{font-size:12px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- buttons, inputs, chips ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel-2);padding:9px 14px;border-radius:10px;font-weight:500;font-size:14px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:#4a3540;background:#281d23}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#ef4570}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--text)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;color:var(--muted)}
+.input,select.input,textarea.input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none}
+.input:focus{border-color:var(--accent)}
+textarea.input{resize:vertical;min-height:90px}
+.input-icon{position:relative}
+.input-icon .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.input-icon .input{padding-left:38px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 9px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.good{color:var(--good);border-color:#2a5a40;background:#132a1f}
+.pill.warn{color:var(--warn);border-color:#5e4520;background:#2a1f10}
+.pill.accent{color:#ff9db6;border-color:#5c2034;background:#2b1019}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;padding:10px 14px;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--text);border-bottom-color:var(--accent)}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{flex:1;border:0;background:none;padding:8px;border-radius:8px;color:var(--muted);font-weight:500}
+.seg button.on{background:var(--accent);color:#fff}
+
+/* ---------- login ---------- */
+.login{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:48px;padding:48px clamp(16px,6vw,96px);
+  background:radial-gradient(900px 500px at 15% 30%,rgba(222,53,97,.22),transparent 60%),radial-gradient(700px 500px at 90% 90%,rgba(143,18,57,.25),transparent 60%),var(--bg)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:20px}
+.brand b{color:var(--accent);font-weight:700}
+.login .brand{font-size:clamp(40px,6vw,64px);gap:14px}
+.login-copy{display:flex;flex-direction:column;gap:22px;max-width:560px}
+.login-copy .lead{font-size:20px;font-family:var(--font-display);font-weight:500}
+.login-feats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:12px;border-top:1px solid var(--line);padding-top:22px}
+.login-feats div{display:flex;flex-direction:column;gap:6px;padding-right:14px;font-size:13px}
+.login-feats div+div{border-left:1px solid var(--line);padding-left:14px}
+.login-feats strong{font-size:14px}
+.login-card{background:rgba(23,17,20,.88);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:16px;max-width:420px;width:100%;justify-self:center;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.login-card h2{text-align:center;font-size:20px}
+.demo-note{font-size:12px;color:var(--muted);text-align:center}
+
+/* ---------- app shell ---------- */
+.app{display:grid;grid-template-columns:236px 1fr;grid-template-rows:minmax(0,1fr);height:100%}
+.side{background:#120d10;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px;gap:18px;overflow-y:auto}
+.side .brand{padding:4px 10px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14px}
+.nav a:hover{background:var(--panel-2);color:var(--text)}
+.nav a.on{background:var(--accent);color:#fff}
+.nav .count{margin-left:auto;font-size:11px;background:rgba(255,255,255,.12);padding:1px 7px;border-radius:999px}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.who{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-weight:600;font-size:14px;color:#fff;flex:none}
+.who .meta{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.who .meta span:last-child{font-size:12px;color:var(--muted)}
+.main{overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(14,10,12,.92);backdrop-filter:blur(8px);z-index:5}
+.topbar .crumb{font-size:13px;color:var(--muted)}
+.topbar .spacer{flex:1}
+.menu-btn{display:none}
+.view{padding:26px 28px 40px;display:flex;flex-direction:column;gap:22px;max-width:1240px;width:100%}
+.view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.view-head .sub{color:var(--muted);margin-top:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1.6fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.demo-banner{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+
+/* hero course card */
+.course-hero{position:relative;overflow:hidden;border-radius:var(--r);padding:24px;min-height:170px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;border:1px solid #4d1a2c;cursor:pointer;text-align:left;color:var(--text);
+  background:radial-gradient(400px 220px at 85% 0%,rgba(255,90,130,.45),transparent 70%),linear-gradient(135deg,#3b0f20 0%,#1c0c13 60%,#170f13 100%)}
+.course-hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.course-hero > *:not(canvas){position:relative}
+.course-hero h2{font-size:24px}
+.course-hero .go{position:absolute;right:18px;bottom:18px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center}
+
+.checklist{display:flex;flex-direction:column;gap:4px}
+.check-row{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:10px;cursor:pointer}
+.check-row:hover{background:var(--panel-2)}
+.check-row input{appearance:none;width:18px;height:18px;border:1.5px solid var(--muted);border-radius:5px;margin:2px 0 0;flex:none;display:grid;place-items:center;cursor:pointer}
+.check-row input:checked{background:var(--accent);border-color:var(--accent)}
+.check-row input:checked::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+.check-row.done .t{text-decoration:line-through;color:var(--muted)}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px 10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-decoration:none;color:var(--text);font-size:13px;font-weight:500;text-align:center;transition:border-color .15s,transform .15s}
+.tile:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tile .ic{color:var(--accent)}
+
+.stat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 10px;text-align:center}
+.stat .ic{color:var(--accent);margin-bottom:4px}
+.stat .n{font-family:var(--font-display);font-size:28px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:14px;padding:12px 4px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .grow{flex:1;min-width:0}
+.row .title{font-weight:500}
+.row-btn{background:none;border:0;width:100%;text-align:left;border-radius:10px;padding:12px 8px}
+.row-btn:hover{background:var(--panel-2)}
+.file-ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#2b1019;color:#ff8aa8;flex:none}
+.file-ic.video{background:#2a1424;color:#ff7aa0}
+
+/* ---------- chat ---------- */
+.chat-wrap{display:flex;flex-direction:column;min-height:0;flex:1 1 0;padding:0}
+.chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 28px 14px;flex-wrap:wrap}
+.chat-scroll{flex:1;overflow-y:auto;padding:8px 28px 20px;display:flex;flex-direction:column;gap:18px;min-height:0}
+.msg{display:flex;gap:12px;max-width:820px}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.bubble{padding:12px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:14.5px;line-height:1.6;max-width:680px}
+.msg.user .bubble{background:var(--accent-deep);border-color:#a8194a}
+.bubble ul{margin:6px 0;padding-left:20px}
+.bubble p+p,.bubble p+ul,.bubble ul+p{margin-top:8px}
+.bubble sup{font-size:10px;color:#ff9db6;font-weight:600;margin-left:1px}
+.bot-ic{width:32px;height:32px;border-radius:10px;background:#2b1019;display:grid;place-items:center;color:var(--accent);flex:none}
+.sources{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.src{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 9px;border-radius:8px;background:var(--bg);border:1px solid var(--line);color:var(--text);cursor:pointer}
+.src:hover{border-color:var(--accent)}
+.suggest{display:flex;gap:8px;flex-wrap:wrap;padding:0 28px 10px}
+.suggest button{font-size:13px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel)}
+.suggest button:hover{border-color:var(--accent)}
+.composer{display:flex;gap:10px;align-items:flex-end;margin:0 28px 22px;padding:8px 8px 8px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.composer textarea{flex:1;background:none;border:0;outline:none;resize:none;padding:8px 0;max-height:160px;min-height:24px}
+.typing{display:inline-flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+
+/* ---------- misc components ---------- */
+.qa-item{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.qa-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.qa-meta .spacer{flex:1}
+.answer{border-left:2px solid var(--accent);padding:4px 0 4px 12px;font-size:14px}
+.answer .by{font-size:12px;color:var(--muted);margin-bottom:2px}
+.summary-card{display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
+.summary-card > button{display:flex;gap:14px;align-items:center;padding:16px 18px;background:none;border:0;text-align:left;width:100%}
+.summary-card > button:hover{background:var(--panel-2)}
+.summary-body{padding:0 18px 18px 72px;display:flex;flex-direction:column;gap:12px}
+.summary-body ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.chev{transition:transform .2s;color:var(--muted)}
+.open .chev{transform:rotate(90deg)}
+.code-box{font-family:var(--font-display);font-size:44px;letter-spacing:.18em;font-weight:600;text-align:center;padding:22px;border-radius:14px;border:2px dashed var(--accent);background:#1d0d14}
+.code-input{text-transform:uppercase;letter-spacing:.3em;font-size:22px;text-align:center;font-family:var(--font-display)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 8px;border-top:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;font-size:12px;border-top:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar-row{display:grid;grid-template-columns:170px 1fr 44px;align-items:center;gap:12px;padding:7px 0}
+.bar{height:10px;border-radius:6px;background:var(--panel-2);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.bar > i.soft{background:#6a3a4b}
+.tool{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 14px;text-align:center;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--text)}
+.tool:hover{border-color:var(--accent)}
+.tool .ic{color:var(--accent);margin-bottom:4px}
+.tool strong{font-size:14px}
+.tool span{font-size:12.5px;color:var(--muted)}
+.week-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:center;padding:11px 4px;border-top:1px solid var(--line)}
+.week-row:first-child{border-top:0}
+.week-row.current{background:#1f0d15;border-radius:10px;border-top-color:transparent;padding-left:10px}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+
+/* modal, toast, popover */
+.scrim{position:fixed;inset:0;background:rgba(6,3,5,.7);display:grid;place-items:center;padding:16px;z-index:50}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:min(620px,100%);max-height:88vh;display:flex;flex-direction:column}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.modal-body{padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
+.page-block{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.page-block.hit{border-color:var(--accent)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#2b1019;border:1px solid #6a2240;color:var(--text);padding:10px 16px;border-radius:10px;z-index:60;font-size:14px;display:flex;gap:8px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pop{position:absolute;right:28px;top:60px;width:340px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;z-index:20;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.pop .row{padding:10px 8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);position:absolute;top:7px;right:7px}
+
+@media (max-width:1020px){
+  .g2,.g4{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:260px;z-index:40;transform:translateX(-105%);transition:transform .2s}
+  .side.open{transform:none;box-shadow:20px 0 60px rgba(0,0,0,.6)}
+  .menu-btn{display:inline-grid}
+  .login{grid-template-columns:1fr;gap:28px;padding-top:36px}
+  .login-feats{grid-template-columns:1fr;gap:12px}
+  .login-feats div+div{border-left:0;padding-left:0}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .view,.chat-head,.chat-scroll{padding-left:16px;padding-right:16px}
+  .composer{margin-left:16px;margin-right:16px}
+  .suggest{padding-left:16px;padding-right:16px}
+  .topbar{padding:12px 16px}
+  .summary-body{padding-left:18px}
+  .bar-row{grid-template-columns:110px 1fr 36px}
+  .pop{right:12px;left:12px;width:auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* ======================= icons ======================= */
+const ICONS={
+  spark:'<path d="M12 2.5l2.1 6.4 6.4 2.1-6.4 2.1L12 19.5l-2.1-6.4L3.5 11l6.4-2.1z"/><path d="M19 17l.7 2.1 2.1.7-2.1.7L19 22.6l-.7-2.1-2.1-.7 2.1-.7z"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  chat:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/>',
+  book:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+  library:'<path d="M4 4h4v16H4z"/><path d="M10 4h4v16h-4z"/><path d="M16.5 5.2l3.4-.9 3.1 15.5-3.4.9z"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/>',
+  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/><path d="M9 15.5l2 2 4-4"/>',
+  question:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/><path d="M9.8 9.3a2.3 2.3 0 0 1 4.4.8c0 1.5-2.2 2-2.2 2"/><path d="M12 15.2h.01"/>',
+  tools:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  chart:'<path d="M3 21h18"/><path d="M6 17V11M11 17V5M16 17v-8M21 17v-4"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>',
+  video:'<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M10 9l5 3-5 3z"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  lock:'<rect x="4.5" y="11" width="15" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  right:'<path d="M9 18l6-6-6-6"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  layers:'<path d="M12 2l10 5-10 5L2 7z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  megaphone:'<path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M17 8.5a5 5 0 0 1 0 7"/><path d="M8 14l1 6h3l-1-5"/>',
+  external:'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14L21 3"/>',
+  refresh:'<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>',
+  thumb:'<path d="M7 10v11H3V10z"/><path d="M7 10l4-8a3 3 0 0 1 3 3v4h5.5a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.1 21H7"/>',
+  trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>'
+};
+const ic=(n,s=18)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
+const logo=(s=26)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path fill="#de3561" d="M11 1.5l2.4 7.3 7.3 2.4-7.3 2.4L11 20.9l-2.4-7.3-7.3-2.4 7.3-2.4z"/><path fill="#ff8aa8" d="M19.5 15.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ======================= course content (sample data) ======================= */
+const COURSE={name:'Generative AI',code:'BASCii',term:'Semester 1/2026',instructor:'Dr. Kanya P.',students:132,schedule:'Fri 13:00–16:00',room:'Room 1104',week:7};
+const WEEKS=[
+ [1,'Intro to Generative AI','9 Oct'],[2,'Large Language Models','16 Oct'],[3,'Tokenization & Embeddings','23 Oct'],[4,'Transformers & Attention','30 Oct'],
+ [5,'LLM Evaluation','6 Nov'],[6,'Prompt Engineering','13 Nov'],[7,'RAG & Vector Databases','20 Nov'],[8,'Midterm Exam','27 Nov'],
+ [9,'Fine-tuning & LoRA','4 Dec'],[10,'Agents & Tool Use','11 Dec'],[11,'Multimodal Models','18 Dec'],[12,'Running Local Models with Ollama','8 Jan'],
+ [13,'Safety, Bias & Responsible AI','15 Jan'],[14,'Project Workshop','22 Jan'],[15,'Final Project Presentations','29 Jan']];
+
+const MATERIALS=[
+ {id:'syl',kind:'syllabus',type:'PDF',title:'Course Syllabus – Generative AI',file:'GenAI_Syllabus.pdf',size:'1.2 MB',date:'2026-10-01',pages:[
+  {p:1,t:'Generative AI (BASCii) is a practical course on how generative models work and how to build with them: large language models, embeddings, prompt engineering, retrieval-augmented generation and real-world applications. Classes meet on Fridays from 13:00 to 16:00 in Room 1104.'},
+  {p:2,t:'Grading: assignments 30%, midterm exam 20%, final project 35%, participation and attendance 15%. Students must attend at least 80% of sessions. Attendance is recorded with a check-in code shown in class.'},
+  {p:3,t:'Policies: late work loses 10% per day for up to 3 days, after which it is not accepted. AI tools such as chatbots may be used for assignments as long as you disclose how you used them. Questions can be asked in class, in office hours, or anonymously through the Anonymous Q&A board.'}]},
+ {id:'w1',kind:'slides',week:1,type:'PDF',title:'Lecture Slides – Week 1: Introduction to GenAI',file:'Lecture_Week1_Intro.pdf',size:'8.4 MB',date:'2026-10-08',pages:[
+  {p:3,t:'Generative AI refers to models that create new content such as text, images, audio and code by learning the patterns in their training data. Discriminative models learn to classify or label inputs, while generative models learn the data distribution and sample new examples from it.'},
+  {p:6,t:'Major model families: autoregressive language models (GPT-style) that predict the next token, diffusion models that generate images by gradually removing noise, GANs with a generator and a discriminator, and variational autoencoders (VAEs).'}]},
+ {id:'w2',kind:'slides',week:2,type:'PDF',title:'Lecture Slides – Week 2: Large Language Models',file:'Lecture_Week2_LLMs.pdf',size:'7.9 MB',date:'2026-10-15',pages:[
+  {p:4,t:'A large language model (LLM) is a transformer trained to predict the next token on a very large text corpus. After pre-training, instruction tuning and RLHF (reinforcement learning from human feedback) teach the model to follow instructions and respond helpfully.'},
+  {p:8,t:'Decoding settings: temperature scales the probability distribution over next tokens. Low temperature makes output more focused and repeatable; high temperature makes it more varied. Temperature 0 means greedy decoding, which is close to deterministic, but small differences can still appear because of hardware and batching. Top-p sampling keeps only the smallest set of tokens whose probabilities add up to p.'},
+  {p:11,t:'The context window is the maximum number of tokens a model can read at once. Hallucination is when a model produces fluent text that is not supported by facts or by the provided sources; grounding the model in retrieved documents reduces it.'}]},
+ {id:'w3',kind:'slides',week:3,type:'PDF',title:'Lecture Slides – Week 3: Tokenization & Embeddings',file:'Lecture_Week3_Embeddings.pdf',size:'6.1 MB',date:'2026-10-22',pages:[
+  {p:3,t:'Tokenizers split text into subword units, for example with byte-pair encoding (BPE). In English one token is roughly three quarters of a word; Thai and other languages often need more tokens per word, which affects cost and context length.'},
+  {p:7,t:'Embeddings map text to dense vectors so that passages with similar meaning end up close together. Cosine similarity measures the angle between two vectors and is the usual way to compare embeddings.'},
+  {p:10,t:'Choosing an embedding model: match the language of your documents (use a multilingual model for mixed Thai and English), weigh vector dimension against storage cost, check the maximum input length against your chunk size, compare scores on the MTEB benchmark, and always test retrieval quality on a sample of your own questions.'}]},
+ {id:'w4',kind:'slides',week:4,type:'PDF',title:'Lecture Slides – Week 4: Transformers & Attention',file:'Lecture_Week4_Transformers.pdf',size:'9.0 MB',date:'2026-10-29',pages:[
+  {p:5,t:'Self-attention lets every token weigh every other token in the sequence. Each token produces a query, a key and a value; attention weights come from softmax(QKᵀ/√d) and are used to mix the values.'},
+  {p:9,t:'Multi-head attention runs several attention operations in parallel so the model can track different relationships. Positional encodings add word-order information. Most modern chat models use a decoder-only transformer.'}]},
+ {id:'w5',kind:'slides',week:5,type:'PDF',title:'Lecture Slides – Week 5: LLM Evaluation',file:'Lecture_Week5_Evaluation.pdf',size:'5.3 MB',date:'2026-11-05',pages:[
+  {p:4,t:'Automatic metrics such as BLEU and ROUGE measure word overlap with a reference answer, and perplexity measures how well a model predicts text. Overlap metrics miss answers that are correct but worded differently.'},
+  {p:8,t:'LLM-as-a-judge uses a strong model with a clear rubric to grade outputs; human evaluation remains the reference point. For RAG systems, evaluate retrieval (does recall@k find the right chunks?) separately from generation (is the answer faithful to the sources and relevant to the question?).'}]},
+ {id:'w6',kind:'slides',week:6,type:'PDF',title:'Lecture Slides – Week 6: Prompt Engineering',file:'Lecture_Week6_Prompting.pdf',size:'4.8 MB',date:'2026-11-12',pages:[
+  {p:3,t:'Zero-shot prompts give only instructions; few-shot prompts add worked examples. Good prompts state the task, the audience, the format of the answer and any constraints.'},
+  {p:7,t:'Chain-of-thought prompting asks the model to reason step by step before answering. Use delimiters to separate instructions from data, request structured output such as JSON when another program will read it, and watch for prompt injection, where text inside the data tries to override your instructions.'}]},
+ {id:'w7',kind:'slides',week:7,type:'PDF',title:'Lecture Slides – Week 7: RAG & Vector Databases',file:'Lecture_Week7_RAG.pdf',size:'10.2 MB',date:'2026-11-16',pages:[
+  {p:3,t:'RAG (retrieval-augmented generation) retrieves relevant documents at question time and adds them to the prompt, so the model answers from those sources instead of only from what it memorised. Pipeline: load documents, split them into chunks, embed each chunk, store the vectors in a vector database, retrieve the top-k chunks for a question, then generate an answer that cites them.'},
+  {p:5,t:'RAG vs fine-tuning: RAG adds knowledge at query time, is easy to update when documents change, and can show its sources. Fine-tuning changes the model weights to adapt its behaviour, style or task format; it needs training data, and knowledge baked into the weights is harder to update. Example: a course chatbot answering from the syllabus and slides should use RAG; making a model always grade in a fixed rubric format is a job for fine-tuning.'},
+  {p:8,t:'Chunking: chunks of roughly 300–800 tokens with 10–20% overlap work well for lecture notes. Vector databases such as Chroma, FAISS and pgvector use approximate nearest-neighbour search. Hybrid search combines keyword search (BM25) with vector search and often retrieves better than either alone.'},
+  {p:11,t:'A local RAG stack: Ollama runs open models such as Llama 3 or Mistral on your own laptop, nomic-embed-text creates the embeddings, and LangChain or LlamaIndex connects the pipeline. For the RAG Practice assignment you may use Ollama or any hosted API.'}]},
+ {id:'u7',kind:'update',week:7,type:'PDF',title:'Weekly Update – Week 7',file:'Weekly_Update_Week7.pdf',size:'0.3 MB',date:'2026-11-16',pages:[
+  {p:1,t:'Week 7 update: the RAG Practice assignment is due Friday 20 November at 23:59. Build a small RAG pipeline over the provided PDFs and report three example questions with their retrieved sources. You may use Ollama or a hosted API.'},
+  {p:2,t:'Midterm exam: Friday 27 November, 13:00–15:00 in Room 1104. It covers weeks 1–7. You may bring one A4 page of handwritten notes.'}]},
+ {id:'u6',kind:'update',week:6,type:'PDF',title:'Weekly Update – Week 6',file:'Weekly_Update_Week6.pdf',size:'0.2 MB',date:'2026-11-09',pages:[
+  {p:1,t:'Week 6 update: Quiz 2 on prompt engineering opens Friday after class and closes Sunday 23:59. The catch-up video for Week 3 is now in the Library.'}]},
+ {id:'v3',kind:'video',week:3,type:'Video',title:'Catch-up Video – Week 3',file:'Catch-up recording',dur:'42:17',date:'2026-10-24',desc:'Full lecture recording on tokenization and embeddings, for students who missed class.',q:'tokenization embeddings explained'},
+ {id:'v6',kind:'video',week:6,type:'Video',title:'Catch-up Video – Week 6',file:'Catch-up recording',dur:'38:05',date:'2026-11-14',desc:'Lecture recording on prompt engineering with live examples.',q:'prompt engineering tutorial'},
+ {id:'r1',kind:'recommended',type:'Video',title:'Recommended: LangChain RAG Tutorial',file:'Recommended by professor',dur:'18:25',date:'2026-11-15',desc:'A step-by-step walkthrough of building a RAG pipeline with LangChain.',q:'langchain rag tutorial'},
+ {id:'r2',kind:'recommended',type:'Video',title:'Recommended: Running Llama Locally with Ollama',file:'Recommended by professor',dur:'12:40',date:'2026-11-15',desc:'How to install Ollama and run open models on your own machine.',q:'ollama run llama locally tutorial'}
+];
+const KIND_LABEL={syllabus:'Syllabus',slides:'Lecture Slides',update:'Weekly Update',video:'Catch-up Video',recommended:'Recommended',upload:'Uploaded'};
+
+const SUMMARIES=[
+ {id:'s6',week:6,title:'Prompt Engineering',date:'2026-11-13',src:'w6',summary:'This session covered how to write prompts that produce reliable results. We compared zero-shot and few-shot prompting, practised chain-of-thought for multi-step problems, and looked at structured output for when another program reads the response. The last part covered prompt injection and why instructions and data should be kept apart.',take:['State the task, audience, format and constraints explicitly.','Few-shot examples help most when the output format is unusual.','Ask for step-by-step reasoning on multi-step problems.','Use delimiters around untrusted data to reduce prompt injection.']},
+ {id:'s5',week:5,title:'LLM Evaluation',date:'2026-11-06',src:'w5',summary:'We looked at how to tell whether a model is doing a good job. Overlap metrics such as BLEU and ROUGE are cheap but miss correct answers worded differently. LLM-as-a-judge with a rubric scales better, and human evaluation stays the reference point. For RAG, retrieval and generation should be evaluated separately.',take:['BLEU/ROUGE measure overlap, not correctness.','Give an LLM judge a clear rubric.','For RAG: check recall@k for retrieval and faithfulness for answers.']},
+ {id:'s4',week:4,title:'Transformers & Attention',date:'2026-10-30',src:'w4',summary:'An inside look at the transformer. Self-attention lets each token weigh every other token using queries, keys and values. Multi-head attention tracks several relationships at once, and positional encodings give the model word order. Modern chat models are decoder-only transformers.',take:['Attention = softmax(QKᵀ/√d)·V.','Multiple heads capture different relationships.','Chat models are decoder-only.']},
+ {id:'s3',week:3,title:'Tokenization & Embeddings',date:'2026-10-23',src:'w3',summary:'How text becomes numbers. Tokenizers break text into subwords, and Thai text often needs more tokens per word than English. Embeddings place similar meanings close together, compared with cosine similarity. We finished with a checklist for choosing an embedding model.',take:['Token counts drive cost and context limits.','Cosine similarity compares embeddings.','Pick a multilingual embedding model for Thai + English documents.']}
+];
+
+const ASSESSMENTS=[
+ ['Assignment 1: Prompt Design','Assignment','23 Oct','Graded','good','10%'],
+ ['Quiz 1: LLM Basics','Quiz','30 Oct','Graded','good','5%'],
+ ['Quiz 2: Prompt Engineering','Quiz','15 Nov','Submitted','good','5%'],
+ ['Assignment 2: RAG Practice','Assignment','20 Nov, 23:59','Due this week','warn','10%'],
+ ['Midterm Exam','Exam','27 Nov, 13:00','Upcoming','','20%'],
+ ['Final Project','Project','29 Jan','Upcoming','','35%']
+];
+
+/* ======================= state ======================= */
+const NOW=Date.now();
+const ago=(min)=>new Date(NOW-min*60000).toISOString();
+function freshState(){return{
+ role:null,name:'',
+ checks:{read:false,watch:true,assign:false},
+ chat:[
+  {role:'user',text:'What is RAG and how is it different from fine-tuning?'},
+  {role:'bot',text:'**RAG (Retrieval-Augmented Generation)** retrieves relevant passages from your course materials when you ask a question and adds them to the prompt, so the answer is grounded in those sources [S1].\n\nThe key difference:\n- **RAG** adds knowledge at query time, is easy to update when documents change, and can cite its sources [S2].\n- **Fine-tuning** changes the model\'s weights to adapt its behaviour, style or task format; knowledge baked in this way is harder to update [S2].\n\nFor a course chatbot like me, RAG is the better fit because the slides and syllabus change every week [S2].',sources:[{id:'w7',p:3},{id:'w7',p:5}]}
+ ],
+ uploads:[],extraVideos:[],
+ summaries:SUMMARIES.map(s=>({...s})),
+ qa:[
+  {id:'q1',text:'Can you explain the difference between RAG and fine-tuning with an example?',topic:'RAG & Vector DBs',at:ago(130),votes:9,mine:false,answer:'Think of RAG as an open-book exam: the model looks up the right pages at question time. Fine-tuning is more like studying until habits change. A chatbot that answers from our syllabus should use RAG; a model that must always grade in our rubric format is a fine-tuning job. See Week 7 slides, p. 5.',answeredAt:ago(95)},
+  {id:'q2',text:'How do we choose the right embedding model for our use case? Our documents are half Thai and half English.',topic:'Embeddings',at:ago(60*26),votes:7,mine:false,answer:null},
+  {id:'q3',text:'Is temperature 0 always fully deterministic?',topic:'LLM Basics',at:ago(60*50),votes:3,mine:false,answer:'Almost, but not always. Temperature 0 means greedy decoding, yet tiny numerical differences from hardware and batching can still change a token now and then. Week 2 slides, p. 8.',answeredAt:ago(60*44)},
+  {id:'q4',text:'For the RAG Practice assignment, can we use Ollama instead of a paid API?',topic:'RAG & Vector DBs',at:ago(10),votes:12,mine:true,answer:null},
+  {id:'q5',text:'What chunk size should we use for lecture slides? Mine keep cutting sentences in half.',topic:'RAG & Vector DBs',at:ago(60*6),votes:5,mine:false,answer:null}
+ ],
+ announcements:[
+  {id:'a1',title:'Midterm exam: Fri 27 Nov, 13:00–15:00',body:'Covers weeks 1–7. One A4 page of handwritten notes allowed. Room 1104.',at:ago(60*20),kind:'Exam'},
+  {id:'a2',title:'RAG Practice due Fri 20 Nov, 23:59',body:'You may use Ollama or any hosted API. Include three example questions with their retrieved sources.',at:ago(60*30),kind:'Assignment'}
+ ],
+ activity:[
+  {icon:'question',text:'New anonymous question in RAG & Vector DBs',at:ago(10)},
+  {icon:'upload',text:'3 files uploaded to Generative AI',at:ago(60)},
+  {icon:'spark',text:'Class summary (Week 6) generated',at:ago(120)}
+ ],
+ topics:{'RAG & Vector DBs':18,'Embeddings':11,'LLM Evaluation':7,'Prompt Engineering':5,'Transformers':4,'LLM Basics':4,'Tokenization':3},
+ attendance:{code:'RAG7K2',checkedIn:false,count:0,records:[['1','9 Oct','Present'],['2','16 Oct','Present'],['3','23 Oct','Absent'],['4','30 Oct','Present'],['5','6 Nov','Present'],['6','13 Nov','Late']],weekly:[128,125,104,121,119,116]},
+ seenBell:0
+};}
+const KEY='genieai-demo-v1';
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))||freshState()}catch(e){S=freshState()}
+if(!S||!S.attendance||!S.summaries){S=freshState()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const UI={view:'dashboard',libTab:'all',libQuery:'',courseTab:'overview',qaTab:'all',attTab:'checkin',openSummary:'s6',busy:false,sideOpen:false,pop:false};
+
+/* ======================= helpers ======================= */
+function allMaterials(){return [...MATERIALS,...S.uploads,...S.extraVideos]}
+function mat(id){return allMaterials().find(m=>m.id===id)}
+function rel(iso){const d=(Date.now()-new Date(iso))/60000;if(d<1)return'just now';if(d<60)return Math.round(d)+' min ago';if(d<1440)return Math.round(d/60)+' hr ago';const n=Math.round(d/1440);return n+(n===1?' day ago':' days ago')}
+function fmtDate(s){return new Date(s+(s.length===10?'T12:00:00':'')).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.innerHTML=ic('check',16)+esc(msg);document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+function pendingCount(){return S.qa.filter(q=>!q.answer).length}
+function gapTopics(){return Object.entries(S.topics).filter(([,n])=>n>=8)}
+function md(text){ // tiny markdown: paragraphs, "- " bullets, **bold**, [S#] refs
+  const lines=esc(text).split('\n');let out='',inList=false;
+  const fmt=l=>l.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\[S(\d+)\]/g,'<sup>[$1]</sup>');
+  for(const raw of lines){const l=raw.trim();
+    if(/^[-•*]\s+/.test(l)){if(!inList){out+='<ul>';inList=true}out+='<li>'+fmt(l.replace(/^[-•*]\s+/,''))+'</li>'}
+    else{if(inList){out+='</ul>';inList=false}if(l)out+='<p>'+fmt(l)+'</p>'}}
+  if(inList)out+='</ul>';return out;
+}
+
+/* ======================= retrieval (client-side RAG) ======================= */
+const STOP=new Set('a an the is are was were be been to of and or in on for with how what why when which who whom does do did can could i you it its this that these those from by as at vs versus between difference different me my our we us about use using should would will there their them than then so if not no yes please explain tell give example examples'.split(' '));
+const stem=w=>w.length>4?w.replace(/(ings|ing|ed|es|s)$/,''):w;
+const toks=s=>(s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(w=>!STOP.has(w)).map(stem).filter(w=>w.length>1);
+function chunks(){const out=[];for(const m of allMaterials()){if(!m.pages)continue;for(const pg of m.pages){out.push({id:m.id,p:pg.p,file:m.file,title:m.title,text:pg.t,tk:toks(m.title+' '+pg.t)})}}return out}
+function retrieve(q,k=4){
+  let qt=toks(q);const ql=q.toLowerCase();
+  if(/\brag\b/.test(ql))qt.push('retrieval','augment');
+  if(/fine.?tun/.test(ql))qt.push('fine','tun');
+  if(/embed/.test(ql))qt.push('embedd');
+  qt=[...new Set(qt)];
+  const cs=chunks(),N=cs.length,df={};
+  cs.forEach(c=>new Set(c.tk).forEach(t=>df[t]=(df[t]||0)+1));
+  cs.forEach(c=>{const tf={};c.tk.forEach(t=>tf[t]=(tf[t]||0)+1);c.score=qt.reduce((s,t)=>s+(tf[t]?(1+Math.log(tf[t]))*(Math.log(N/df[t])+1):0),0)});
+  const ranked=cs.filter(c=>c.score>0).sort((a,b)=>b.score-a.score);
+  if(!ranked.length)return[];const top=ranked[0].score;
+  return ranked.filter(c=>c.score>=top*.35).slice(0,k);
+}
+function topicOf(q){const l=q.toLowerCase();
+  if(/\brag\b|retriev|vector|chunk|chroma|faiss|langchain|ollama/.test(l))return'RAG & Vector DBs';
+  if(/embed|cosine|similarity/.test(l))return'Embeddings';
+  if(/evaluat|metric|bleu|rouge|judge/.test(l))return'LLM Evaluation';
+  if(/prompt|few.?shot|chain.of.thought|injection/.test(l))return'Prompt Engineering';
+  if(/attention|transformer/.test(l))return'Transformers';
+  if(/token/.test(l))return'Tokenization';
+  return'LLM Basics'}
+
+/* ======================= Claude (live AI) ======================= */
+let SAMPLE=null;
+(async()=>{try{if(window.claude&&window.claude.use){SAMPLE=await window.claude.use('sample');if(UI.view==='ask'||UI.view==='tools')render()}}catch(e){SAMPLE=null}})();
+
+/* ======================= layout ======================= */
+const NAV={
+ student:[['dashboard','Dashboard','grid'],['ask','Ask GENieAi','spark'],['courses','My Courses','book'],['library','Library','library'],['summaries','Class Summaries','file'],['attendance','Attendance','cal'],['qa','Anonymous Q&A','question']],
+ professor:[['dashboard','Dashboard','grid'],['courses','My Courses','book'],['tools','Professor Tools','tools'],['qa','Anonymous Q&A','question'],['analytics','Analytics','chart'],['library','Library','library'],['summaries','Class Summaries','file'],['attendance','Attendance','cal']]
+};
+const TITLES={dashboard:'Dashboard',ask:'Ask GENieAi',courses:'My Courses',library:'Library',summaries:'Class Summaries',attendance:'Attendance',qa:'Anonymous Q&A',tools:'Professor Tools',analytics:'Analytics'};
+
+function render(){
+  const root=document.getElementById('root');
+  if(!S.role){root.innerHTML=viewLogin();bindLogin();document.title='GenieAi';return}
+  const nav=NAV[S.role];if(!nav.find(n=>n[0]===UI.view))UI.view='dashboard';
+  const unseen=S.announcements.length+S.qa.filter(q=>q.mine&&q.answer).length-S.seenBell;
+  root.innerHTML=`<div class="app">
+   <aside class="side ${UI.sideOpen?'open':''}" id="side">
+     <div class="brand">${logo()}<span>Genie<b>Ai</b></span></div>
+     <nav class="nav" aria-label="Main">${nav.map(([k,l,i])=>`<a href="#${k}" class="${UI.view===k?'on':''}">${ic(i)}${l}${k==='qa'&&S.role==='professor'&&pendingCount()?`<span class="count">${pendingCount()}</span>`:''}</a>`).join('')}</nav>
+     <div class="side-foot">
+       <div class="who"><div class="avatar">${esc(S.name[0]||'?').toUpperCase()}</div><div class="meta"><span>${esc(S.name)}</span><span>${S.role==='student'?'Student':'Professor'}</span></div></div>
+       <button class="btn ghost sm" data-act="logout">${ic('logout',16)}Log out</button>
+       <button class="btn ghost sm" data-act="reset" title="Clear changes you made in this demo">${ic('refresh',16)}Reset demo data</button>
+     </div>
+   </aside>
+   <main class="main" id="main">
+     <div class="topbar">
+       <button class="icon-btn menu-btn" data-act="menu" aria-label="Open menu">${ic('menu')}</button>
+       <span class="crumb">${esc(COURSE.name)} · ${esc(COURSE.code)} · Week ${COURSE.week}</span>
+       <span class="spacer"></span>
+       <div style="position:relative"><button class="icon-btn" data-act="bell" aria-label="Notifications">${ic('bell')}${unseen>0?'<span class="dot"></span>':''}</button></div>
+     </div>
+     ${UI.pop?popover():''}
+     ${VIEWS[UI.view]()}
+   </main></div>`;
+  document.title=TITLES[UI.view]+' · GenieAi';
+  after[UI.view]&&after[UI.view]();
+}
+function popover(){
+  const items=[...S.announcements.map(a=>({i:'megaphone',t:a.title,at:a.at})),...S.qa.filter(q=>q.mine&&q.answer).map(q=>({i:'question',t:'Your question was answered: “'+q.text.slice(0,50)+'…”',at:q.answeredAt}))].sort((a,b)=>new Date(b.at)-new Date(a.at));
+  return `<div class="pop" role="dialog" aria-label="Notifications"><div class="list">${items.length?items.map(x=>`<div class="row">${ic(x.i,16)}<div class="grow small">${esc(x.t)}<div class="tiny muted">${rel(x.at)}</div></div></div>`).join(''):'<div class="row muted small">No notifications</div>'}</div></div>`;
+}
+
+/* ======================= login ======================= */
+let loginRole='student';
+function viewLogin(){return `<div class="login">
+  <div class="login-copy">
+    <div class="brand">${logo(58)}<span>Genie<b>Ai</b></span></div>
+    <p class="lead">Your Generative AI study assistant</p>
+    <p class="muted">Ask questions about your course and get answers that point back to the slides they came from. Find every lecture, summary and recording in one library, and reach your professor anonymously when you are stuck.</p>
+    <div class="login-feats">
+      <div>${ic('spark',22).replace('class="ic"','class="ic" style="color:var(--accent)"')}<strong>AI Study Assistant</strong><span class="muted">RAG over course materials, with sources</span></div>
+      <div>${ic('layers',22).replace('class="ic"','class="ic" style="color:var(--accent)"')}<strong>Course Resources</strong><span class="muted">Slides, updates, videos and AI summaries</span></div>
+      <div>${ic('users',22).replace('class="ic"','class="ic" style="color:var(--accent)"')}<strong>Students & Professors</strong><span class="muted">Attendance, anonymous Q&A, learning gaps</span></div>
+    </div>
+  </div>
+  <form class="login-card" id="loginForm">
+    <h2>Log in to GenieAi</h2>
+    <div class="seg" role="tablist">
+      <button type="button" class="${loginRole==='student'?'on':''}" data-role="student">Student</button>
+      <button type="button" class="${loginRole==='professor'?'on':''}" data-role="professor">Professor</button>
+    </div>
+    <div class="field"><label for="lid">${loginRole==='student'?'Student ID or email':'Staff email'}</label><div class="input-icon">${ic('user',16)}<input class="input" id="lid" value="${loginRole==='student'?'verana@student.bascii.demo':'kanya@bascii.demo'}" autocomplete="username"></div></div>
+    <div class="field"><label for="lpw">Password</label><div class="input-icon">${ic('lock',16)}<input class="input" id="lpw" type="password" value="demo1234" autocomplete="current-password"></div></div>
+    <button class="btn primary" style="justify-content:center;padding:12px">Log in as ${loginRole}</button>
+    <p class="demo-note">Demo site: any email and password will work. Switch between Student and Professor to see both views.</p>
+  </form>
+</div>`}
+function bindLogin(){
+  document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{loginRole=b.dataset.role;render()});
+  document.getElementById('loginForm').onsubmit=e=>{e.preventDefault();
+    const id=document.getElementById('lid').value.trim(),pw=document.getElementById('lpw').value;
+    if(!id||!pw){toast('Enter your email and password to continue');return}
+    S.role=loginRole;S.name=loginRole==='student'?(id.split(/[@.]/)[0].replace(/^\w/,c=>c.toUpperCase())||'Student'):'Professor';
+    save();UI.view='dashboard';history.replaceState(null,'','#dashboard');render()}
+}
+
+/* ======================= views ======================= */
+const VIEWS={};const after={};
+
+VIEWS.dashboard=()=>S.role==='student'?studentDash():profDash();
+function studentDash(){
+  const c=S.checks;const s=S.summaries[0];const a=S.announcements[0];
+  return `<section class="view">
+   <div class="view-head"><div><h1>Welcome back, ${esc(S.name)}</h1><p class="sub">Week ${COURSE.week} of 15. Here is what's on for Generative AI.</p></div></div>
+   <div class="grid g2">
+     <button class="course-hero" data-go="courses"><canvas id="heroWave"></canvas>
+       <span class="pill accent" style="align-self:flex-start;margin-bottom:auto">Ongoing · Week ${COURSE.week}</span>
+       <h2>Generative AI</h2><span class="muted">${COURSE.code} · ${COURSE.instructor} · ${COURSE.schedule}</span>
+       <span class="go">${ic('right')}</span></button>
+     <div class="card"><div class="card-head"><h2>This week</h2><span class="tiny muted">${Object.values(c).filter(Boolean).length} of 3 done</span></div>
+       <div class="checklist">
+        ${[['read','Read: RAG & Vector Databases slides','Week 7 · 12 pages'],['watch','Watch: LangChain RAG tutorial','Recommended · 18 min'],['assign','Assignment: RAG Practice','Due Fri 20 Nov, 23:59']].map(([k,t,m])=>`<label class="check-row ${c[k]?'done':''}"><input type="checkbox" data-check="${k}" ${c[k]?'checked':''}><span><span class="t">${t}</span><br><span class="tiny muted">${m}</span></span></label>`).join('')}
+       </div></div>
+   </div>
+   <div><h2 style="margin-bottom:12px">Quick access</h2>
+    <div class="tiles">${[['ask','Ask GENieAi','spark'],['library','Library','library'],['summaries','Class Summaries','file'],['attendance','Attendance','cal'],['qa','Anonymous Q&A','question']].map(([k,l,i])=>`<a class="tile" href="#${k}">${ic(i,24)}${l}</a>`).join('')}</div></div>
+   <div class="grid g2">
+     <div class="card"><div class="card-head"><h2>Latest class summary</h2><a href="#summaries" class="small">All summaries</a></div>
+       <h3>Week ${s.week}: ${esc(s.title)}</h3><p class="tiny muted" style="margin:2px 0 10px">${fmtDate(s.date)} · AI summary</p><p class="muted">${esc(s.summary)}</p></div>
+     <div class="card"><div class="card-head"><h2>Announcements</h2></div>
+       <div class="list">${S.announcements.slice(0,3).map(a=>`<div class="row">${ic('megaphone',18)}<div class="grow"><div class="title">${esc(a.title)}</div><div class="small muted">${esc(a.body)}</div></div></div>`).join('')}</div></div>
+   </div>
+  </section>`;
+}
+after.dashboard=()=>{drawWave();document.querySelectorAll('[data-check]').forEach(x=>x.onchange=()=>{S.checks[x.dataset.check]=x.checked;save();render()})};
+function drawWave(){const cv=document.getElementById('heroWave');if(!cv)return;const r=cv.getBoundingClientRect();const d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;const g=cv.getContext('2d');g.scale(d,d);
+  for(let i=0;i<18;i++){g.beginPath();g.strokeStyle=`rgba(255,${110+i*4},${150+i*3},${0.08+i*0.012})`;g.lineWidth=1;
+    for(let x=0;x<=r.width;x+=6){const y=r.height*0.25+i*5+Math.sin(x/90+i*0.35)*22+Math.cos(x/40+i)*4;x?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}}
+
+function profDash(){
+  const recent=allMaterials().filter(m=>new Date(m.date)>=new Date('2026-11-14')).length;
+  return `<section class="view">
+   <div class="view-head"><div><h1>Welcome, Professor</h1><p class="sub">Manage your course, materials and students.</p></div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-tool="upload">${ic('upload',16)}Upload materials</button><button class="btn primary" data-tool="summary">${ic('spark',16)}Generate summary</button></div></div>
+   <div class="grid g4">
+     <a class="card stat tile" href="#attendance">${ic('users',22)}<span class="n">${COURSE.students}</span><span class="small muted">Students</span></a>
+     <a class="card stat tile" href="#qa">${ic('question',22)}<span class="n">${pendingCount()}</span><span class="small muted">Unanswered questions</span></a>
+     <a class="card stat tile" href="#library">${ic('file',22)}<span class="n">${recent}</span><span class="small muted">Materials updated this week</span></a>
+     <a class="card stat tile" href="#analytics">${ic('chart',22)}<span class="n">${gapTopics().length}</span><span class="small muted">Learning gaps</span></a>
+   </div>
+   <div class="grid g2">
+     <div class="card"><div class="card-head"><h2>Recent activity</h2></div>
+       <div class="list">${S.activity.slice(0,6).map(a=>`<div class="row">${ic(a.icon,18)}<div class="grow">${esc(a.text)}</div><span class="tiny muted">${rel(a.at)}</span></div>`).join('')}</div></div>
+     <div class="card"><div class="card-head"><h2>Needs a reply</h2><a href="#qa" class="small">Open Q&A</a></div>
+       <div class="list">${S.qa.filter(q=>!q.answer).sort((a,b)=>b.votes-a.votes).slice(0,3).map(q=>`<div class="row"><div class="grow"><div class="small">${esc(q.text)}</div><div class="tiny muted">${esc(q.topic)} · ${q.votes} students asking</div></div></div>`).join('')||'<div class="row muted small">All questions answered.</div>'}</div></div>
+   </div>
+  </section>`;
+}
+
+/* ---------- Ask GENieAi ---------- */
+VIEWS.ask=()=>{
+  const live=!!SAMPLE;
+  return `<section class="chat-wrap">
+   <div class="chat-head"><div><h1>Ask GENieAi</h1><p class="sub muted small">Your course-aware study assistant. Answers come from the Generative AI course materials, with sources.</p></div>
+     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+       <span class="pill ${live?'good':''}" title="${live?'Answers are written by Claude from retrieved course passages':'Shows the best-matching passages from your course materials'}">${live?'● Live AI':'Retrieval only'}</span>
+       <select class="input" style="width:auto;padding:7px 10px" aria-label="Project"><option>Project: Generative AI</option></select>
+       <button class="btn sm" data-act="newchat">${ic('plus',14)}New chat</button></div></div>
+   <div class="chat-scroll" id="chatScroll">${S.chat.map(msgHTML).join('')}</div>
+   ${S.chat.length<=2?`<div class="suggest">${['How do I choose an embedding model for Thai documents?','What chunk size should I use?','When is the midterm and what does it cover?','Is temperature 0 deterministic?'].map(q=>`<button data-suggest="${esc(q)}">${esc(q)}</button>`).join('')}</div>`:''}
+   <form class="composer" id="composer"><textarea id="chatIn" rows="1" placeholder="Ask a question about your course…" aria-label="Your question"></textarea>
+     <button class="btn primary" ${UI.busy?'disabled':''} aria-label="Send">${ic('send',16)}</button></form>
+  </section>`};
+function msgHTML(m,i){
+  if(m.role==='user')return `<div class="msg user"><div class="bubble">${esc(m.text)}</div></div>`;
+  const src=(m.sources||[]).map((s,k)=>{const x=mat(s.id);return x?`<button class="src" data-src="${s.id}" data-page="${s.p}">${ic('file',13)}${esc(x.file)} (p. ${s.p})</button>`:''}).join('');
+  return `<div class="msg bot"><div class="bot-ic">${ic('spark',18)}</div><div class="bubble">${m.pending&&!m.text?'<span class="typing"><i></i><i></i><i></i></span>':md(m.text)}
+    ${src?`<div class="sources"><span class="tiny muted">Sources:</span>${src}</div>`:''}
+    ${m.note?`<p class="tiny muted" style="margin-top:8px">${esc(m.note)}</p>`:''}</div></div>`;
+}
+after.ask=()=>{
+  const sc=document.getElementById('chatScroll');sc.scrollTop=sc.scrollHeight;
+  const ta=document.getElementById('chatIn');
+  ta.oninput=()=>{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,160)+'px'};
+  ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('composer').requestSubmit()}};
+  document.getElementById('composer').onsubmit=e=>{e.preventDefault();const q=ta.value.trim();if(q&&!UI.busy)ask(q)};
+  if(!UI.busy)ta.focus({preventScroll:true});
+};
+async function ask(q){
+  if(UI.busy) return;
+  UI.busy = true;
+
+  S.chat.push({role:'user',text:q});
+  const bot = {role:'bot',text:'',pending:true,sources:[]};
+  S.chat.push(bot);
+  save();
+  render();
+
+  try {
+    const messages = S.chat
+      .filter(m => !m.pending && (m.role === 'user' || m.role === 'bot'))
+      .map(m => ({
+        role: m.role === 'bot' ? 'assistant' : 'user',
+        content: m.text
+      }));
+
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages})
+    });
+
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.error || 'Chat request failed');
+
+    bot.text = data.message?.content || 'No answer returned.';
+    bot.sources = (data.sources || []).map((source, i) => ({
+      id: i + 1,
+      file: source.filename || 'Uploaded document',
+      p: source.location || '',
+      text: source.text || ''
+    }));
+  } catch(err) {
+    bot.text = 'Unable to connect to Ollama + RAG: ' + err.message;
+    bot.sources = [];
+  } finally {
+    bot.pending = false;
+    UI.busy = false;
+    save();
+    render();
+  }
+}
+function offlineAnswer(bot,hits){
+  const top=hits.slice(0,2);
+  bot.text='Here is what your course materials say:\n'+top.map((h,i)=>`- ${h.text} [S${i+1}]`).join('\n');
+  bot.sources=top.map(h=>({id:h.id,p:h.p}));
+  bot.note='Retrieval-only mode: these are the closest passages. Open a source to read it in full.';
+}
+
+/* ---------- Library ---------- */
+VIEWS.library=()=>{
+  const tabs=[['all','All Materials'],['syllabus','Syllabus'],['slides','Lecture Slides'],['update','Weekly Updates'],['video','Catch-up Videos'],['recommended','Recommended']];
+  const q=UI.libQuery.toLowerCase();
+  let items=allMaterials().filter(m=>UI.libTab==='all'||m.kind===UI.libTab||(UI.libTab==='slides'&&m.kind==='upload')).filter(m=>!q||(m.title+' '+(m.pages||[]).map(p=>p.t).join(' ')).toLowerCase().includes(q));
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+  return `<section class="view">
+   <div class="view-head"><div><h1>Library</h1><p class="sub">Every study material for Generative AI, from your professor.</p></div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap">${S.role==='professor'?`<button class="btn primary" data-tool="upload">${ic('upload',16)}Upload</button>`:''}
+     <div class="input-icon" style="width:260px;max-width:100%">${ic('search',16)}<input class="input" id="libSearch" placeholder="Search materials…" value="${esc(UI.libQuery)}" aria-label="Search materials"></div></div></div>
+   <div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button class="tab ${UI.libTab===k?'on':''}" data-libtab="${k}">${l}</button>`).join('')}</div>
+   <div class="card" style="padding:8px"><div class="list" id="libList">${items.length?items.map(m=>`<div class="row" style="padding:10px"><div class="file-ic ${m.type==='Video'?'video':''}">${ic(m.type==='Video'?'video':'file',18)}</div>
+      <div class="grow"><div class="title">${esc(m.title)}</div><div class="tiny muted">${m.type}${m.size?' · '+m.size:''}${m.dur?' · '+m.dur:''} · ${KIND_LABEL[m.kind]} · Updated ${fmtDate(m.date)}</div></div>
+      <button class="btn sm" data-open="${m.id}">${m.type==='Video'?'Details':'Read'}</button>
+      ${m.pages?`<button class="btn sm ghost" data-askabout="${m.id}" title="Ask GENieAi about this file">${ic('spark',14)}Ask</button>`:''}</div>`).join(''):`<div class="empty">No materials match “${esc(UI.libQuery)}”.</div>`}</div></div>
+  </section>`};
+after.library=()=>{const s=document.getElementById('libSearch');s.oninput=()=>{UI.libQuery=s.value;const pos=s.selectionStart;render();const n=document.getElementById('libSearch');n.focus();n.setSelectionRange(pos,pos)}};
+function openMaterial(id,page){
+  const m=mat(id);if(!m)return;
+  if(m.type==='Video'){modal(m.title,`<p class="muted">${esc(m.desc||'')}</p><div class="page-block"><div class="small">${ic('clock',14)} Length ${esc(m.dur||'–')} · ${esc(m.file)} · Added ${fmtDate(m.date)}</div></div>
+     <p class="small muted">Video playback runs in the full GenieAi app. In this demo you can find the topic on YouTube:</p>
+     <a class="btn" href="${m.url||'https://www.youtube.com/results?search_query='+encodeURIComponent(m.q||m.title)}" target="_blank" rel="noopener">${ic('external',16)}${m.url?'Open video link':'Search YouTube for this topic'}</a>`);return}
+  modal(m.title,`<p class="tiny muted">${esc(m.file)} · ${esc(m.size||'')} · Updated ${fmtDate(m.date)}</p>${m.pages.map(p=>`<div class="page-block ${p.p==page?'hit':''}" ${p.p==page?'id="hitPage"':''}><span class="tiny muted">Page ${p.p}</span><p>${esc(p.t)}</p></div>`).join('')}`,null,()=>{const h=document.getElementById('hitPage');h&&h.scrollIntoView({block:'center'})});
+}
+
+/* ---------- Courses ---------- */
+VIEWS.courses=()=>{
+  const tabs=[['overview','Overview'],['weeks','Weekly Topics'],['materials','Materials'],['assess','Assessments'],['news','Announcements']];
+  let body='';
+  if(UI.courseTab==='overview')body=`<div class="grid g2">
+     <div class="card"><h2 style="margin-bottom:8px">Course overview</h2><p class="muted">A practical course on generative AI, large language models and real-world applications. You will learn how models are built and evaluated, then build your own retrieval-augmented assistant.</p>
+       <div class="list" style="margin-top:12px">
+        <div class="row">${ic('user')}<div class="grow"><div class="tiny muted">Instructor</div>${COURSE.instructor}</div></div>
+        <div class="row">${ic('users')}<div class="grow"><div class="tiny muted">Students</div><span class="num">${COURSE.students}</span></div></div>
+        <div class="row">${ic('clock')}<div class="grow"><div class="tiny muted">Schedule</div>${COURSE.schedule} · ${COURSE.room}</div></div></div></div>
+     <div class="card"><h2 style="margin-bottom:12px">This week (Week 7)</h2><div class="list">
+       <div class="row">${ic('book')}<div class="grow">Topic: RAG & Vector Databases</div></div>
+       <div class="row">${ic('file')}<div class="grow">Read: Lecture Slides (Week 7)</div><button class="btn sm" data-open="w7">Read</button></div>
+       <div class="row">${ic('cal')}<div class="grow">Assignment: RAG Practice<div class="tiny muted">Due Fri 20 Nov, 23:59</div></div><span class="pill warn">Due soon</span></div></div></div></div>`;
+  if(UI.courseTab==='weeks')body=`<div class="card" style="padding:10px 14px">${WEEKS.map(([n,t,d])=>`<div class="week-row ${n===COURSE.week?'current':''}"><span class="small muted">Week ${n}</span><div><div class="title">${t}</div><div class="tiny muted">Fri ${d}</div></div>${n<COURSE.week?'<span class="pill good">Done</span>':n===COURSE.week?'<span class="pill accent">This week</span>':'<span class="pill">Upcoming</span>'}</div>`).join('')}</div>`;
+  if(UI.courseTab==='materials')body=`<div class="card" style="padding:8px"><div class="list">${allMaterials().filter(m=>m.kind==='slides'||m.kind==='upload').sort((a,b)=>(b.week||99)-(a.week||99)).map(m=>`<div class="row" style="padding:10px"><div class="file-ic">${ic('file',18)}</div><div class="grow"><div class="title">${esc(m.title)}</div><div class="tiny muted">${m.size||''} · ${fmtDate(m.date)}</div></div><button class="btn sm" data-open="${m.id}">Read</button></div>`).join('')}</div></div>`;
+  if(UI.courseTab==='assess')body=`<div class="card" style="overflow-x:auto"><table><thead><tr><th>Assessment</th><th>Type</th><th>Due</th><th>Status</th><th class="num">Weight</th></tr></thead><tbody>${ASSESSMENTS.map(a=>`<tr><td>${a[0]}</td><td class="muted">${a[1]}</td><td>${a[2]}</td><td><span class="pill ${a[4]}">${a[3]}</span></td><td class="num">${a[5]}</td></tr>`).join('')}</tbody></table></div>`;
+  if(UI.courseTab==='news')body=`<div class="list" style="gap:12px">${S.announcements.map(a=>`<div class="qa-item"><div class="qa-meta"><span class="pill accent">${esc(a.kind)}</span><span>${rel(a.at)}</span></div><h3>${esc(a.title)}</h3><p class="muted">${esc(a.body)}</p></div>`).join('')}${S.role==='professor'?`<button class="btn" data-tool="exam" style="align-self:flex-start">${ic('plus',16)}Post an update</button>`:''}</div>`;
+  return `<section class="view">
+   <div class="course-hero" style="cursor:default;min-height:130px"><canvas id="heroWave"></canvas><h1>Generative AI (${COURSE.code})</h1><span class="muted">${COURSE.code} · ${COURSE.term}</span></div>
+   <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${UI.courseTab===k?'on':''}" data-coursetab="${k}">${l}</button>`).join('')}</div>${body}</section>`};
+after.courses=drawWave;
+
+/* ---------- Summaries ---------- */
+VIEWS.summaries=()=>`<section class="view">
+  <div class="view-head"><div><h1>Class Summaries</h1><p class="sub">AI-generated summaries of each lecture, checked by your professor.</p></div>
+   ${S.role==='professor'?`<button class="btn primary" data-tool="summary">${ic('spark',16)}Generate summary</button>`:'<select class="input" style="width:auto" aria-label="Course"><option>Generative AI</option></select>'}</div>
+  <div class="list" style="gap:12px">${S.summaries.slice().sort((a,b)=>b.week-a.week).map(s=>`<div class="card summary-card ${UI.openSummary===s.id?'open':''}">
+    <button data-summary="${s.id}" aria-expanded="${UI.openSummary===s.id}"><div class="file-ic">${ic('file',18)}</div><div class="grow"><h3>Week ${s.week}: ${esc(s.title)}</h3><div class="qa-meta" style="margin-top:4px"><span>${fmtDate(s.date)}</span><span class="pill">AI Summary</span><span class="pill">Key Takeaways</span></div></div><span class="chev">${ic('right')}</span></button>
+    ${UI.openSummary===s.id?`<div class="summary-body"><p>${esc(s.summary)}</p><div><h3 style="margin-bottom:6px">Key takeaways</h3><ul>${s.take.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${mat(s.src)?`<button class="btn sm" data-open="${s.src}">${ic('file',14)}Source slides</button>`:''}${S.role==='student'?`<button class="btn sm" data-askabout="${s.src}">${ic('spark',14)}Ask GENieAi about this</button>`:''}</div></div>`:''}
+  </div>`).join('')}</div></section>`;
+
+/* ---------- Attendance ---------- */
+VIEWS.attendance=()=>{
+  const A=S.attendance;
+  if(S.role==='professor'){
+    const present=A.count+(A.checkedIn?1:0);
+    return `<section class="view"><div class="view-head"><div><h1>Attendance</h1><p class="sub">Show this code in class. Students enter it in GenieAi to check in.</p></div></div>
+    <div class="grid g2"><div class="card" style="display:flex;flex-direction:column;gap:14px"><div class="card-head" style="margin:0"><h2>Week 7 · Fri 20 Nov · 13:00–16:00</h2><span class="pill good">Open</span></div>
+       <div class="code-box" aria-label="Check-in code">${A.code}</div>
+       <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap"><span class="muted"><strong class="num" style="color:var(--text)">${present}</strong> of ${COURSE.students} checked in</span><button class="btn sm" data-act="newcode">${ic('refresh',14)}New code</button></div></div>
+     <div class="card"><h2 style="margin-bottom:12px">Attendance by week</h2>${A.weekly.map((n,i)=>`<div class="bar-row"><span class="small">Week ${i+1}</span><div class="bar"><i style="width:${n/COURSE.students*100}%"></i></div><span class="small num muted">${Math.round(n/COURSE.students*100)}%</span></div>`).join('')}
+       <p class="tiny muted" style="margin-top:10px">9 students have missed two or more sessions and are below the 80% requirement.</p></div></div></section>`}
+  const att=A.records.filter(r=>r[2]!=='Absent').length+(A.checkedIn?1:0),tot=A.records.length+(A.checkedIn?1:0);
+  return `<section class="view"><div class="view-head"><div><h1>Attendance</h1><p class="sub">Check in to class and track your attendance.</p></div></div>
+   <div class="tabs"><button class="tab ${UI.attTab==='checkin'?'on':''}" data-atttab="checkin">Check In</button><button class="tab ${UI.attTab==='records'?'on':''}" data-atttab="records">My Records</button></div>
+   ${UI.attTab==='checkin'?`<div class="card" style="max-width:480px;display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center">
+     ${A.checkedIn?`<div style="color:var(--good);display:grid;place-items:center">${ic('check',44)}</div><h2>You're checked in</h2><p class="muted">Generative AI · Week 7 · Fri 20 Nov, 13:00–16:00</p>`:
+     `<h2>Enter the check-in code</h2><p class="muted small">Generative AI · Week 7 · Fri 20 Nov, 13:00–16:00. Your professor shows the code on screen in class.</p>
+     <form id="ciForm" style="display:flex;flex-direction:column;gap:10px"><input class="input code-input" id="ciCode" maxlength="6" placeholder="······" aria-label="Check-in code" autocomplete="off"><button class="btn primary" style="justify-content:center">Check in</button></form>
+     <p class="tiny muted">Demo code: ${A.code}</p>`}</div>`:
+   `<div class="grid g3"><div class="card stat"><span class="n">${Math.round(att/tot*100)}%</span><span class="small muted">Attendance rate</span></div><div class="card stat"><span class="n">${att}/${tot}</span><span class="small muted">Sessions attended</span></div><div class="card stat"><span class="n">80%</span><span class="small muted">Required</span></div></div>
+    <div class="card" style="overflow-x:auto"><table><thead><tr><th>Week</th><th>Date</th><th>Status</th></tr></thead><tbody>${[...A.records,...(A.checkedIn?[['7','20 Nov','Present']]:[])].reverse().map(r=>`<tr><td>Week ${r[0]}</td><td>${r[1]}</td><td><span class="pill ${r[2]==='Present'?'good':r[2]==='Late'?'warn':'accent'}">${r[2]}</span></td></tr>`).join('')}</tbody></table></div>`}
+  </section>`};
+after.attendance=()=>{const f=document.getElementById('ciForm');if(f)f.onsubmit=e=>{e.preventDefault();const v=document.getElementById('ciCode').value.trim().toUpperCase();
+  if(v===S.attendance.code){S.attendance.checkedIn=true;save();toast('Checked in for Week 7');render()}else{toast('That code doesn\'t match. Check the code on screen and try again.')}}};
+
+/* ---------- Anonymous Q&A ---------- */
+VIEWS.qa=()=>{
+  const prof=S.role==='professor';
+  const tabs=prof?[['all','All'],['pending','Unanswered'],['answered','Answered']]:[['all','All Questions'],['mine','My Questions']];
+  let list=S.qa.filter(q=>UI.qaTab==='all'||(UI.qaTab==='mine'&&q.mine)||(UI.qaTab==='pending'&&!q.answer)||(UI.qaTab==='answered'&&q.answer));
+  list.sort((a,b)=>prof?(!!a.answer-!!b.answer)||b.votes-a.votes:new Date(b.at)-new Date(a.at));
+  if(!tabs.find(t=>t[0]===UI.qaTab))UI.qaTab='all';
+  return `<section class="view"><div class="view-head"><div><h1>Anonymous Q&A</h1><p class="sub">${prof?'Questions from students. Names are never shown, to you or to classmates.':'Ask anything about the course. Your name is never shown, to your professor or to classmates.'}</p></div>
+    ${prof?'':`<button class="btn primary" data-act="askq">${ic('plus',16)}Ask a question</button>`}</div>
+   <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${UI.qaTab===k?'on':''}" data-qatab="${k}">${l}</button>`).join('')}</div>
+   <div class="list" style="gap:12px">${list.length?list.map(q=>`<article class="qa-item">
+     <div class="qa-meta">${ic('user',14)}<span>Anonymous${q.mine&&!prof?' (you)':''} · ${rel(q.at)}</span><span class="pill">${esc(q.topic)}</span><span class="spacer"></span>${q.answer?'<span class="pill good">'+ic('check',12)+'Answered</span>':'<span class="pill warn">Waiting for reply</span>'}</div>
+     <p style="font-size:15.5px">${esc(q.text)}</p>
+     ${q.answer?`<div class="answer"><div class="by">Professor · ${rel(q.answeredAt)}</div>${esc(q.answer)}</div>`:''}
+     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      ${prof?`<span class="small muted">${ic('thumb',14).replace('class="ic"','class="ic" style="display:inline;vertical-align:-2px"')} ${q.votes} students have this question</span>`:`<button class="btn sm ghost" data-vote="${q.id}" ${q.voted?'disabled':''}>${ic('thumb',14)}${q.voted?'You asked this too':'I have this question too'} · ${q.votes}</button>`}
+      ${prof&&!q.answer?`<button class="btn sm primary" data-reply="${q.id}" style="margin-left:auto">Reply</button>`:''}
+     </div></article>`).join(''):`<div class="empty">${UI.qaTab==='mine'?'You haven\'t asked anything yet. Questions you ask appear here.':'Nothing here yet.'}</div>`}</div></section>`};
+
+/* ---------- Professor tools ---------- */
+VIEWS.tools=()=>`<section class="view"><div class="view-head"><div><h1>Professor Tools</h1><p class="sub">Manage course content, updates and student learning.</p></div>${SAMPLE?'<span class="pill good">● Live AI summaries</span>':''}</div>
+  <div class="grid g3">
+   ${[['upload','upload','Upload Materials','Slides, PDFs and notes. Text files are added to GENieAi\'s knowledge.'],['summary','spark','Generate Summary','Create an AI summary of a lecture for students.'],['exam','megaphone','Exam Updates','Announce exams and changes to the schedule.'],['video','video','Recommend Videos','Add helpful videos to the Library.'],['qa','question','Manage Q&A',`Reply to anonymous questions (${pendingCount()} waiting).`],['gaps','chart','Learning Gap Insights','See the topics students ask about most.']].map(([k,i,t,d])=>`<button class="tool" data-tool="${k}">${ic(i,28)}<strong>${t}</strong><span>${d}</span></button>`).join('')}
+  </div>
+  <div class="card"><div class="card-head"><h2>Your recent uploads</h2></div><div class="list">${[...S.uploads,...S.extraVideos].length?[...S.uploads,...S.extraVideos].map(m=>`<div class="row"><div class="file-ic ${m.type==='Video'?'video':''}">${ic(m.type==='Video'?'video':'file',18)}</div><div class="grow"><div class="title">${esc(m.title)}</div><div class="tiny muted">${esc(m.file)} · ${KIND_LABEL[m.kind]}${m.pages?' · searchable by GENieAi':''}</div></div><button class="icon-btn" data-del="${m.id}" aria-label="Remove ${esc(m.title)}">${ic('trash',16)}</button></div>`).join(''):'<p class="muted small">Nothing uploaded in this session yet. Try Upload Materials with a .txt or .md file of lecture notes, then ask GENieAi about it.</p>'}</div></div></section>`;
+
+/* ---------- Analytics ---------- */
+VIEWS.analytics=()=>{
+  const ent=Object.entries(S.topics).sort((a,b)=>b[1]-a[1]);const max=ent[0][1];
+  const qaBy={};S.qa.forEach(q=>qaBy[q.topic]=(qaBy[q.topic]||0)+q.votes);
+  return `<section class="view"><div class="view-head"><div><h1>Learning Gap Insights</h1><p class="sub">Topics students ask GENieAi and the Q&A board about most. Counts are anonymous and update as students ask.</p></div></div>
+   <div class="grid g3"><div class="card stat"><span class="n">${ent.reduce((s,e)=>s+e[1],0)}</span><span class="small muted">Questions asked to GENieAi</span></div><div class="card stat"><span class="n">${S.qa.length}</span><span class="small muted">Anonymous questions</span></div><div class="card stat"><span class="n">${gapTopics().length}</span><span class="small muted">Topics flagged as gaps</span></div></div>
+   <div class="grid g2"><div class="card"><div class="card-head"><h2>Questions by topic</h2><span class="tiny muted">Flagged at 8+ questions</span></div>
+     ${ent.map(([t,n])=>`<div class="bar-row"><span class="small">${esc(t)}</span><div class="bar"><i class="${n>=8?'':'soft'}" style="width:${n/max*100}%"></i></div><span class="small num ${n>=8?'':'muted'}" style="text-align:right">${n}</span></div>`).join('')}</div>
+    <div class="card"><h2 style="margin-bottom:12px">Suggested review</h2><div class="list">${gapTopics().sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<div class="row">${ic('target',18)}<div class="grow"><div class="title">${esc(t)}</div><div class="tiny muted">${n} questions${qaBy[t]?` · ${qaBy[t]} Q&A votes`:''}</div></div></div>`).join('')}</div>
+     <p class="small muted" style="margin-top:12px">Consider a 10-minute recap of these at the start of next class, or a short recommended video.</p></div></div></section>`};
+
+/* ======================= modals & tools ======================= */
+function modal(title,body,onOk,onMount,okLabel='Save'){
+  const sc=document.createElement('div');sc.className='scrim';
+  sc.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="modal-head"><h2>${esc(title)}</h2><button class="icon-btn" data-close aria-label="Close">${ic('x')}</button></div><div class="modal-body">${body}</div>${onOk?`<div class="modal-foot"><button class="btn" data-close>Cancel</button><button class="btn primary" data-ok>${okLabel}</button></div>`:''}</div>`;
+  const close=()=>{sc.remove();document.removeEventListener('keydown',k)};const k=e=>{if(e.key==='Escape')close()};
+  sc.addEventListener('click',e=>{if(e.target===sc||e.target.closest('[data-close]'))close()});
+  document.addEventListener('keydown',k);document.body.appendChild(sc);
+  if(onOk)sc.querySelector('[data-ok]').onclick=async()=>{const r=await onOk(sc);if(r!==false)close()};
+  onMount&&onMount(sc);const f=sc.querySelector('input,textarea,select');f&&f.focus();return sc;
+}
+const TOPIC_OPTS=['RAG & Vector DBs','Embeddings','Prompt Engineering','LLM Evaluation','Transformers','Tokenization','LLM Basics','Assignments & Exams'];
+function askQuestion(){modal('Ask anonymously',`<div class="field"><label for="qText">Your question</label><textarea class="input" id="qText" placeholder="e.g. How many chunks should we retrieve for the RAG assignment?"></textarea></div>
+  <div class="field"><label for="qTopic">Topic</label><select class="input" id="qTopic">${TOPIC_OPTS.map(t=>`<option>${t}</option>`).join('')}</select></div>
+  <p class="tiny muted">${ic('lock',13).replace('class="ic"','class="ic" style="display:inline;vertical-align:-2px"')} Your name is not attached to this question.</p>`,sc=>{
+  const t=sc.querySelector('#qText').value.trim();if(t.length<8){toast('Write your question in a few more words');return false}
+  const topic=sc.querySelector('#qTopic').value;
+  S.qa.unshift({id:'q'+Date.now(),text:t,topic,at:new Date().toISOString(),votes:1,mine:true,voted:true,answer:null});
+  S.topics[topic]=(S.topics[topic]||0)+1;
+  S.activity.unshift({icon:'question',text:'New anonymous question in '+topic,at:new Date().toISOString()});
+  save();UI.qaTab='mine';render();toast('Question posted anonymously')},null,'Post question')}
+function reply(id){const q=S.qa.find(x=>x.id===id);modal('Reply to question',`<div class="page-block"><span class="tiny muted">Anonymous · ${esc(q.topic)}</span><p>${esc(q.text)}</p></div>
+  <div class="field"><label for="rText">Your reply (visible to all students)</label><textarea class="input" id="rText"></textarea></div>
+  ${SAMPLE?`<button class="btn sm" id="draftBtn" style="align-self:flex-start">${ic('spark',14)}Draft a reply from course materials</button>`:''}`,sc=>{
+  const t=sc.querySelector('#rText').value.trim();if(!t){toast('Write a reply first');return false}
+  q.answer=t;q.answeredAt=new Date().toISOString();S.activity.unshift({icon:'check',text:'You answered a question in '+q.topic,at:q.answeredAt});save();render();toast('Reply posted')},
+  sc=>{const b=sc.querySelector('#draftBtn');if(b)b.onclick=async()=>{b.disabled=true;b.innerHTML='Drafting…';const hits=retrieve(q.text,3);const ta=sc.querySelector('#rText');
+    try{await SAMPLE(`You are helping a university professor reply to an anonymous student question in the course "Generative AI". Using ONLY these course excerpts, draft a friendly, plain-text reply under 90 words that the professor can edit. Mention the slide file and page when useful. No greeting or sign-off.\n\n${hits.map(h=>`${h.file}, p. ${h.p}: ${h.text}`).join('\n')}\n\nStudent question: ${q.text}`,{modelTier:'quick',cache:false,onText:({text})=>{ta.value=text}})}catch(e){toast('Couldn\'t draft a reply right now. You can still write one.')}
+    b.disabled=false;b.innerHTML=ic('spark',14)+'Draft again'}},'Post reply')}
+
+function toolUpload(){modal('Upload materials',`<div class="field"><label for="uFile">File</label><input class="input" type="file" id="uFile" accept=".pdf,.txt,.md,.pptx,.docx,.mp4"></div>
+  <div class="field"><label for="uTitle">Title</label><input class="input" id="uTitle" placeholder="e.g. Lecture Notes – Week 7: Hybrid Search"></div>
+  <div class="field"><label for="uKind">Category</label><select class="input" id="uKind"><option value="upload">Lecture slides / notes</option><option value="update">Weekly update</option><option value="syllabus">Syllabus</option></select></div>
+  <p class="tiny muted">Text files (.txt, .md) are split into chunks and become searchable by GENieAi straight away. Other file types are listed in the Library.</p>`,async sc=>{
+  const f=sc.querySelector('#uFile').files[0];if(!f){toast('Choose a file to upload');return false}
+  const title=sc.querySelector('#uTitle').value.trim()||f.name.replace(/\.[^.]+$/,'');
+  const m={id:'up'+Date.now(),kind:sc.querySelector('#uKind').value,type:(f.name.split('.').pop()||'file').toUpperCase(),title,file:f.name,size:(f.size/1048576).toFixed(1)+' MB',date:new Date().toISOString().slice(0,10),week:COURSE.week};
+  if(/\.(txt|md)$/i.test(f.name)){const text=(await f.text()).slice(0,60000);const paras=text.split(/\n\s*\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);const pages=[];let buf='';
+    paras.forEach(p=>{if((buf+' '+p).length>700&&buf){pages.push(buf);buf=p}else buf=(buf?buf+' ':'')+p});if(buf)pages.push(buf);m.pages=pages.map((t,i)=>({p:i+1,t}))}
+  S.uploads.push(m);S.activity.unshift({icon:'upload',text:`Uploaded “${title}”`,at:new Date().toISOString()});save();render();toast(m.pages?`Uploaded. GENieAi can now answer from ${m.pages.length} section${m.pages.length>1?'s':''} of this file.`:'Uploaded to the Library')},null,'Upload')}
+
+function toolSummary(){
+  const lectures=allMaterials().filter(m=>(m.kind==='slides'||m.kind==='upload')&&m.pages);
+  modal('Generate class summary',`<div class="field"><label for="sSrc">Lecture material</label><select class="input" id="sSrc">${lectures.sort((a,b)=>(b.week||0)-(a.week||0)).map(m=>`<option value="${m.id}">${esc(m.title)}</option>`).join('')}</select></div>
+   <button class="btn" id="genBtn" style="align-self:flex-start">${ic('spark',16)}Generate</button>
+   <div id="sOut" class="page-block" style="display:none"></div>`,sc=>{
+   const out=sc._result;if(!out){toast('Generate a summary first');return false}
+   S.summaries=S.summaries.filter(s=>!(s.src===out.src));S.summaries.push(out);UI.openSummary=out.id;
+   S.activity.unshift({icon:'spark',text:`Class summary (Week ${out.week}) published`,at:new Date().toISOString()});save();UI.view='summaries';location.hash='summaries';render();toast('Summary published to students')},
+   sc=>{sc.querySelector('#genBtn').onclick=async()=>{
+     const m=mat(sc.querySelector('#sSrc').value);const box=sc.querySelector('#sOut');const btn=sc.querySelector('#genBtn');btn.disabled=true;btn.textContent='Generating…';box.style.display='flex';
+     const title=m.title.replace(/^.*?Week \d+:\s*/,'').replace(/^Lecture (Slides|Notes)\s*[–-]\s*/,'');
+     let summary='',take=[];
+     const show=()=>{box.innerHTML=`<span class="tiny muted">Preview · Week ${m.week||COURSE.week}: ${esc(title)}</span><p>${esc(summary)||'<span class="typing"><i></i><i></i><i></i></span>'}</p>${take.length?'<ul style="margin:0;padding-left:18px">'+take.map(t=>`<li>${esc(t)}</li>`).join('')+'</ul>':''}`};show();
+     const parse=txt=>{const s=txt.split(/TAKEAWAYS:/i);summary=s[0].replace(/^\s*SUMMARY:\s*/i,'').trim();take=(s[1]||'').split('\n').map(l=>l.replace(/^[-•*\d.)\s]+/,'').trim()).filter(Boolean)};
+     if(SAMPLE){try{await SAMPLE(`Summarise this university lecture for students in the course "Generative AI". Use only the material below.\nReturn exactly this format and nothing else:\nSUMMARY: <one paragraph, 60-90 words, plain language>\nTAKEAWAYS:\n- <takeaway>\n- <takeaway>\n- <takeaway>\n\nLecture material:\n${m.pages.map(p=>`(p. ${p.p}) ${p.t}`).join('\n')}`,{modelTier:'quick',cache:false,onText:({text})=>{parse(text);show()}})}catch(e){SAMPLE_FAIL()}}
+     else SAMPLE_FAIL();
+     function SAMPLE_FAIL(){const sents=m.pages.map(p=>p.t.split(/(?<=\.)\s/)[0]);summary=sents.join(' ');take=m.pages.map(p=>{const s=p.t.split(/(?<=\.)\s/);return (s[1]||s[0]).slice(0,140)})}
+     show();sc._result={id:'s'+Date.now(),week:m.week||COURSE.week,title,date:new Date().toISOString().slice(0,10),src:m.id,summary,take:take.slice(0,5)};
+     btn.disabled=false;btn.innerHTML=ic('refresh',16)+'Regenerate';sc.querySelector('[data-ok]').disabled=false};
+     sc.querySelector('[data-ok]').disabled=true},'Publish to students')}
+
+function toolExam(){modal('Post an exam or course update',`<div class="field"><label for="eTitle">Headline</label><input class="input" id="eTitle" placeholder="e.g. Midterm moved to Room 1201"></div>
+  <div class="field"><label for="eKind">Type</label><select class="input" id="eKind"><option>Exam</option><option>Assignment</option><option>Schedule</option><option>General</option></select></div>
+  <div class="field"><label for="eBody">Details</label><textarea class="input" id="eBody"></textarea></div>`,sc=>{
+  const t=sc.querySelector('#eTitle').value.trim();if(!t){toast('Add a headline');return false}
+  S.announcements.unshift({id:'a'+Date.now(),title:t,body:sc.querySelector('#eBody').value.trim(),kind:sc.querySelector('#eKind').value,at:new Date().toISOString()});
+  S.activity.unshift({icon:'megaphone',text:'Posted: '+t,at:new Date().toISOString()});save();render();toast('Update posted to students')},null,'Post update')}
+function toolVideo(){modal('Recommend a video',`<div class="field"><label for="vTitle">Title</label><input class="input" id="vTitle" placeholder="e.g. Hybrid search explained"></div>
+  <div class="field"><label for="vUrl">Link</label><input class="input" id="vUrl" type="url" placeholder="https://"></div>
+  <div class="field"><label for="vDur">Length (optional)</label><input class="input" id="vDur" placeholder="12:30"></div>
+  <div class="field"><label for="vDesc">Why watch it (optional)</label><textarea class="input" id="vDesc" style="min-height:60px"></textarea></div>`,sc=>{
+  const t=sc.querySelector('#vTitle').value.trim(),u=sc.querySelector('#vUrl').value.trim();if(!t||!/^https?:\/\//.test(u)){toast('Add a title and a link starting with https://');return false}
+  S.extraVideos.push({id:'rv'+Date.now(),kind:'recommended',type:'Video',title:'Recommended: '+t,file:'Recommended by professor',dur:sc.querySelector('#vDur').value.trim()||'–',date:new Date().toISOString().slice(0,10),desc:sc.querySelector('#vDesc').value.trim(),url:u});
+  S.activity.unshift({icon:'video',text:'Recommended video: '+t,at:new Date().toISOString()});save();render();toast('Video added to the Library')},null,'Add video')}
+
+/* ======================= events ======================= */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act],[data-go],[data-libtab],[data-coursetab],[data-qatab],[data-atttab],[data-open],[data-src],[data-askabout],[data-suggest],[data-summary],[data-vote],[data-reply],[data-tool],[data-del],.nav a');
+  if(UI.pop&&!e.target.closest('.pop')&&!(t&&t.dataset.act==='bell')){UI.pop=false;render();if(!t)return}
+  if(!t)return;const d=t.dataset;
+  if(t.matches('.nav a')){UI.sideOpen=false;return}
+  if(d.act==='logout'){S.role=null;save();history.replaceState(null,'','#');render();return}
+  if(d.act==='reset'){const role=S.role,name=S.name;S=freshState();S.role=role;S.name=name;save();render();toast('Demo data reset');return}
+  if(d.act==='menu'){UI.sideOpen=!UI.sideOpen;render();return}
+  if(d.act==='bell'){UI.pop=!UI.pop;S.seenBell=S.announcements.length+S.qa.filter(q=>q.mine&&q.answer).length;save();render();return}
+  if(d.act==='newchat'){S.chat=[{role:'bot',text:'Hi! Ask me anything about Generative AI. I answer from your course slides, syllabus and weekly updates, and show where each answer came from.'}];save();render();return}
+  if(d.act==='askq'){askQuestion();return}
+  if(d.act==='newcode'){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';S.attendance.code=Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');save();render();return}
+  if(d.go){location.hash=d.go;return}
+  if(d.libtab){UI.libTab=d.libtab;render();return}
+  if(d.coursetab){UI.courseTab=d.coursetab;render();return}
+  if(d.qatab){UI.qaTab=d.qatab;render();return}
+  if(d.atttab){UI.attTab=d.atttab;render();return}
+  if(d.open){openMaterial(d.open);return}
+  if(d.src){openMaterial(d.src,+d.page);return}
+  if(d.askabout){const m=mat(d.askabout);location.hash='ask';setTimeout(()=>{const ta=document.getElementById('chatIn');if(ta){ta.value=`Explain the key ideas in "${m.title}"`;ta.focus()}},50);return}
+  if(d.suggest){if(!UI.busy)ask(d.suggest);return}
+  if(d.summary){UI.openSummary=UI.openSummary===d.summary?null:d.summary;render();return}
+  if(d.vote){const q=S.qa.find(x=>x.id===d.vote);if(q&&!q.voted){q.votes++;q.voted=true;S.topics[q.topic]=(S.topics[q.topic]||0)+1;save();render()}return}
+  if(d.reply){reply(d.reply);return}
+  if(d.del){S.uploads=S.uploads.filter(m=>m.id!==d.del);S.extraVideos=S.extraVideos.filter(m=>m.id!==d.del);save();render();return}
+  if(d.tool){({upload:toolUpload,summary:toolSummary,exam:toolExam,video:toolVideo,qa:()=>location.hash='qa',gaps:()=>location.hash='analytics'})[d.tool]();return}
+});
+function route(){const h=location.hash.slice(1);if(S.role&&NAV[S.role].find(n=>n[0]===h))UI.view=h;else if(S.role&&!h)UI.view='dashboard';UI.pop=false;render();const m=document.getElementById('main');if(m)m.scrollTop=0}
+window.addEventListener('hashchange',route);
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(drawWave,150)});
+route();
+</script>
+</body>
+</html>
