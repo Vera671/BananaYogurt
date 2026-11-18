@@ -1,79 +1,96 @@
-# Local RAG Study Assistant
+# GenieAi – Generative AI study assistant (Banana Yogurt)
 
-Flask + Ollama `gemma3:1b` answers study questions from your local PDF, TXT, DOCX, and Markdown collection. The existing Chat and Document Collection tabs, browser conversation history, uploads, and file limits are preserved. No cloud API or API key is needed.
+GenieAi is a local web app for one course, with a student side and a professor side. Its core is **Ask GENieAi**, a chatbot that answers students' questions from the uploaded course materials and shows which file each answer came from. It uses **Ollama** running on your own computer (`gemma3:1b` for answers, `nomic-embed-text` for retrieval), so no cloud API or API key is needed and documents never leave the machine.
 
-## Install and run
+It grew out of the Lab "Codex and a personal AI assistant" chatbot (Flask + Ollama, browser-side history, document upload) and keeps all of that behaviour.
+
+| Feature | Who | How it works |
+|---|---|---|
+| Ask GENieAi | Students (and professors) | RAG over the Library: question → `nomic-embed-text` → top passages → `gemma3:1b` → answer with numbered sources and clickable links. History stays in the browser. |
+| Lessons | Everyone | Upload a file (or pick one from the Library) and `gemma3:1b` writes a lesson from it: overview, learning objectives, explained sections, key terms and a multiple-choice practice quiz with answer checking. Students' lessons are private to them; professors can share lessons with the class. |
+| Library | Everyone | Uploaded PDF/DOCX/TXT/MD files, labelled as syllabus, lecture notes or weekly update, plus catch-up and recommended video links. Read any document's indexed passages. |
+| Course Dashboard | Everyone | Overview, weekly topics, materials, assessments and announcements. |
+| Class Summaries | Professors write, students read | `gemma3:1b` drafts a summary and key takeaways from a lecture document; the professor edits and publishes it. |
+| Attendance | Both | The professor opens check-in and shows a 6-letter code; students enter it. |
+| Anonymous Q&A | Both | Students ask without their name; classmates can add "I have this question too"; the professor replies, optionally starting from a `gemma3:1b` draft based on the course materials. |
+| Professor Tools | Professors | Upload materials, generate summaries, post exam updates, recommend videos, manage Q&A. |
+| Analytics (learning gaps) | Professors | Counts the topics of GENieAi and Q&A questions (anonymously) and flags topics with 3 or more. |
+
+## Install on a Mac (one step)
+
+You need macOS 14 or newer and about 2 GB of free disk space. Open **Terminal**, go to this folder and run:
+
+```bash
+bash setup_mac.sh
+```
+
+The script installs Ollama (if missing), downloads `gemma3:1b` and `nomic-embed-text`, creates a Python virtual environment, installs the packages, adds sample course materials, indexes them and opens GenieAi in your browser. If macOS asks to install the Command Line Tools (needed for Python), click **Install**, wait, then run the command again. Use `bash setup_mac.sh --no-demo` to skip the sample materials.
+
+Next time, start GenieAi by double-clicking **start_genieai.command** (or `bash start_genieai.command`). Keep that Terminal window open while you use it; press Ctrl+C to stop. It opens **http://127.0.0.1:5000**, or port 5001 if macOS AirPlay Receiver is using 5000.
+
+## Manual setup (any OS)
 
 Requires Python 3.9+ and [Ollama](https://ollama.com/).
 
 ```bash
-ollama serve
-```
-
-Skip this if the Ollama desktop app is already serving on localhost:11434. In another terminal:
-
-```bash
 ollama pull gemma3:1b
 ollama pull nomic-embed-text
-git clone https://github.com/Vera671/BananaYogurt.git
-cd BananaYogurt
-python3 -m venv .venv  # skip if your virtual environment already exists
-source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 python -m pip install -r requirements.txt
+python -m flask --app src.app seed-demo        # optional: sample course materials
 python -m flask --app src.app index-documents
-python src/app.py
+python src/app.py                               # PORT=5001 python src/app.py to change port
 ```
 
-Open **http://127.0.0.1:5000**. No build step is needed. Flask binds to loopback with debug disabled. Stop it with Ctrl+C.
+## Using it
 
-The indexing command reads existing `uploads/` files. Existing local documents do not need to be uploaded again. A fresh clone contains no private documents: upload your own files using Document Collection. It prints the indexed count and any failures; rerunning only processes changed or failed files. Initial indexing may take time while Ollama loads the embedding model. You can also trigger synchronization by opening/refreshing Document Collection or asking a question.
+Pick **Student** or **Professor** on the first screen and enter your name. This local version has no passwords: the role is remembered in that browser only, so anyone using the computer can switch. To try both sides at once, open the professor in one browser and the student in another (or a private window).
+
+Course details (name, instructor, schedule, current week, weekly topics, assessments, the "This week" checklist) live in **`src/course.json`**. The values there are samples; edit them to match the real course and restart the app.
+
+Small local models are slow on some laptops and can still make mistakes. An answer can take from a few seconds to a minute, and summaries and drafted replies should be checked before publishing.
 
 ## How it works
 
-Previously, uploads were stored on disk and listed/deleted through `/api/documents`; chat forwarded conversation history directly to Ollama without reading documents.
+`src/rag.py` extracts text (PDF per page, DOCX paragraphs and tables, TXT/MD), splits it into 1,200-character passages with 200-character overlap, embeds them with `nomic-embed-text` through Ollama's `/api/embed`, and stores them in `data/index.sqlite3`. For each question it retrieves up to four passages with cosine similarity of at least 0.35. `src/app.py` sends those passages and the conversation to `gemma3:1b` through `/api/chat` (non-streaming) with instructions to answer only from them, cite `[1]`, `[2]`, and ignore instructions inside documents. With no matching passage it says so without calling the model. All Ollama calls happen in Python, never in the browser.
 
-Now `src/rag.py` extracts UTF-8 TXT/MD, PDF text per page, and DOCX paragraphs and tables. It splits text into 1,200-character passages with 200-character overlap. Batched calls to Ollama's `/api/embed` use `nomic-embed-text`, with document/query prefixes. Embeddings and extracted passages persist in `data/index.sqlite3`. SQLite with exact cosine search is a suitable local vector store for small study collections; it requires no separate database installation. Search scans the index, so larger collections may need an approximate vector database.
+`src/genie.py` adds the course features. Questions, votes, announcements, summaries, attendance, video links, material labels and topic counts are stored in `data/genie.sqlite3`. Students are identified only by a random ID kept in their browser, which lets GenieAi show "My Questions" and attendance records without names. Professors never see who asked a question. Topic counts come from keyword rules, not from the model.
 
-Content hashes and an index version prevent needless re-embedding. Changed documents replace their old passages; failed replacements cannot supply stale evidence. Missing or deleted files are purged. Index changes are transactional per document, and synchronization is serialized within the local Flask process. Run one server process. Original uploads are never rewritten by indexing.
+Content hashes stop unchanged documents from being embedded again; changed or deleted files are re-indexed or purged on the next sync. Uploads are limited to 10 MiB, and chat requests to 1 MiB. Ollama calls time out after 120 seconds for chat, 180 seconds for summaries and drafted replies, and 300 seconds for lessons. Lessons use only the first 7,000 characters of a document, so split very long files.
 
-For each question, Flask synchronizes the collection, embeds the question, and retrieves up to four passages with cosine similarity at least 0.35. A system instruction asks Gemma to answer only from those passages, cite numbered sources, ignore instructions embedded in documents, and acknowledge missing answers. The reply includes a server-generated list of retrieved filenames and page/chunk locations, also returned as structured `sources` in the API. Retrieved sources identify evidence supplied to the model; they do not independently verify every generated claim. Small models can still make grounding mistakes. The similarity cutoff is a heuristic, not a guarantee of answerability. With no matching passages, Flask returns a missing-answer message without calling Gemma.
+## API
 
-Chat history remains in browser memory and clears on reload or New chat. Switching tabs preserves history and the draft. Follow-up retrieval uses the latest question, so include the subject in ambiguous follow-ups. Failed turns preserve the input for retry. Replies render safely as text with clickable HTTP/HTTPS links.
-
-## Document Collection
-
-Upload PDF, TXT, DOCX, or MD files up to **10 MiB** each. Names are sanitized and duplicates receive unique suffixes. Uploads are saved even when extraction or embeddings fail; the upload message and file list show the failure. Fix the cause and click **Refresh** to retry. The file list displays `indexed` or `failed` without changing the tab layout. A failure in any document blocks document chat with an actionable error, avoiding silently incomplete answers.
-
-Delete permanently removes the selected upload and its index entries. Files removed outside the app are purged on the next synchronization. Scanned PDFs require OCR before upload; encrypted, corrupt, empty files, or non-UTF-8 text can fail extraction. DOCX table text is included; image text and embedded attachments are not extracted.
-
-Endpoints: `GET /api/documents` lists and synchronizes; `POST /api/documents` accepts multipart `file`, saves, and synchronizes; `DELETE /api/documents/<filename>` removes a document; `POST /api/chat` accepts alternating user/assistant `messages`. Chat requests retain a 1 MiB limit and Ollama calls use a 120-second timeout per call.
+| Method and path | Purpose |
+|---|---|
+| `POST /api/chat` | `{messages:[...]}` alternating user/assistant → `{message, sources}` |
+| `GET/POST /api/documents`, `DELETE /api/documents/<name>` | List and sync, upload (multipart `file`), delete |
+| `GET /api/documents/<name>/passages` | Indexed passages of one document |
+| `PUT /api/materials/<name>` | Title, category (`slides`, `syllabus`, `update`, `other`) and week |
+| `GET /api/overview?role=student\|professor` | Everything the pages show (attendance code only for `professor`) |
+| `POST /api/questions`, `/vote`, `/answer`, `/draft`; `DELETE /api/questions/<id>` | Anonymous Q&A (send `X-Client-Id`) |
+| `POST /api/announcements`, `DELETE /api/announcements/<id>` | Exam and course updates |
+| `POST /api/summaries/generate`, `POST /api/summaries`, `DELETE /api/summaries/<id>` | Draft with `gemma3:1b`, publish, remove |
+| `POST /api/lessons` (`document`, optional `focus`, `share`), `POST /api/lessons/<id>/share`, `DELETE /api/lessons/<id>` | Generate a lesson with Ollama structured JSON output, share it, delete it |
+| `POST /api/videos`, `DELETE /api/videos/<id>` | Recommended and catch-up video links |
+| `POST /api/attendance/open`, `POST /api/attendance/checkin` | New check-in code; student check-in |
 
 ## Privacy and troubleshooting
 
-`uploads/`, `data/`, vector database files, virtual environments, `.env` files, and Python caches are ignored by Git. Do not force-add them. This project does not publish or upload your documents to GitHub. Document text and questions are sent only to Ollama at localhost:11434. The app is intended for personal local use and has no authentication.
+`uploads/`, `data/`, `.venv/`, `.env` files and caches are ignored by Git. Do not force-add them; this project never uploads your documents to GitHub. Document text and questions go only to Ollama at localhost:11434. Flask binds to 127.0.0.1 with debug off. There is no authentication, so this is for local use and demos, not a public server.
 
-- Cannot reach Ollama: start `ollama serve` or the desktop app.
-- Embedding failure: run `ollama pull nomic-embed-text`, then Refresh. Check Ollama logs if it persists.
-- Missing chat model: run `ollama pull gemma3:1b`.
-- Parser import error: activate `.venv` and reinstall `requirements.txt`.
-- No answer: check indexing status, ask a more specific question, or add relevant material.
-- To rebuild a corrupt index or after replacing the embedding model: stop Flask, remove only `data/index.sqlite3`, then rerun `index-documents`. Keep `uploads/` intact.
-- Storage error: check local permissions and disk space. Long initial indexing may require waiting through several embedding batches.
+- **Cannot reach Ollama**: open the Ollama app (llama icon in the menu bar) or run `ollama serve`.
+- **Model not found**: `ollama pull gemma3:1b` and `ollama pull nomic-embed-text`.
+- **Port 5000 in use / 403 page**: macOS AirPlay Receiver uses port 5000. `start_genieai.command` switches to 5001 automatically; or turn off AirPlay Receiver in System Settings → General → AirDrop & Handoff.
+- **No answer found**: add relevant material to the Library or ask more specifically.
+- **Rebuild the index**: stop the app, delete only `data/index.sqlite3`, then run `index-documents`. Deleting `data/genie.sqlite3` resets Q&A, summaries, attendance and announcements.
 
-## Structure and verification
+## Structure and tests
 
-`src/app.py`: Flask routes and grounded prompts; `src/rag.py`: extraction, indexing, embedding, retrieval; `src/templates/` and `src/static/`: existing interface; `tests/`: automated tests; `uploads/`: original private files; `data/`: rebuildable private index.
+`src/app.py` Flask app, chat and document routes · `src/rag.py` extraction, embeddings, retrieval · `src/genie.py` course features · `src/course.json` course details · `src/templates/`, `src/static/` the GenieAi interface (no build step) · `docs/sample-materials/` sample lecture notes used by `seed-demo` · `tests/` automated tests · `setup_mac.sh`, `start_genieai.command` Mac install and start.
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-Tests use temporary directories and mock Ollama, covering index persistence, the five-document backfill, modification/deletion, retries, chunking, malformed embeddings, abstention, prompt injection of source context, API errors, and existing upload/chat behavior. They do not modify your collection. A real model smoke test still requires the setup above: ask “What range does the sigmoid function output?” after uploading a relevant document and confirm a citation to its filename; then ask an unrelated question and check that the assistant acknowledges missing evidence.
-
-Optional frontend interaction check on macOS:
-
-```bash
-/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc tests/test_frontend.js
-```
-
-Formatting/lint tooling is configured in `pyproject.toml`; install `ruff` separately for development and run `ruff check src/rag.py` or `ruff format src/rag.py`. No frontend build is required.
+The tests use temporary folders and mock Ollama. They cover chat history and errors, uploads, indexing and retrieval, anonymous Q&A (authors hidden, votes counted once), attendance codes hidden from students, summaries parsed from model output, Ollama-down errors, video link validation, lesson generation (malformed model output is cleaned or rejected; private lessons stay private) and the demo seed. A real-model check still needs the setup above: ask "What is RAG and how is it different from fine-tuning?" and confirm the answer cites `Week7_RAG_and_Vector_Databases.md`; then ask something unrelated and check that GENieAi says the materials don't cover it.

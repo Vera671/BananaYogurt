@@ -2,11 +2,11 @@
 
 ## Project Structure & Module Organization
 
-This directory is currently an empty project scaffold. No source code, tests, assets, or build configuration exist yet. When introducing the initial implementation, keep application code in `src/`, automated tests in `tests/`, and supporting documentation in `docs/`, unless the chosen framework requires another layout. Create asset directories only when needed. Document the actual layout in `README.md` as the project develops.
+GenieAi is a Flask app that uses a local Ollama (`gemma3:1b`, `nomic-embed-text`). Application code is in `src/` (`app.py` chat and documents, `rag.py` retrieval, `genie.py` course features, `course.json` course details, `templates/` and `static/` the interface), tests in `tests/`, and sample course materials in `docs/sample-materials/`. Keep all Ollama calls on the Python side, bind Flask to 127.0.0.1, and document layout changes in `README.md`.
 
 ## Build, Test, and Development Commands
 
-No build, test, or local development commands are currently configured. When adding tooling, provide reproducible commands for installing dependencies, running locally, building, and testing. Record those commands in `README.md` and commit the relevant manifests and lockfiles. Do not assume commands such as `npm test` or `make build` are available before their configuration exists.
+Install and start on macOS with `bash setup_mac.sh`, then `bash start_genieai.command`. Run tests with `python -m unittest discover -s tests -v`. There is no frontend build step. Record any new commands in `README.md`.
 
 ## Coding Style & Naming Conventions
 
