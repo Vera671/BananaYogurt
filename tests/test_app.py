@@ -17,7 +17,7 @@ class ChatTests(unittest.TestCase):
         self.messages = [{"role": "user", "content": "Hello"}]
 
     def test_page_and_assets(self):
-        for path in ("/", "/static/chat.js", "/static/style.css"):
+        for path in ("/", "/static/genie.js", "/static/genie.css"):
             with self.client.get(path) as response:
                 self.assertEqual(response.status_code, 200)
 

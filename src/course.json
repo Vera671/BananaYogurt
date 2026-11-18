@@ -1,0 +1,42 @@
+{
+  "_note": "Course details shown in GenieAi. Edit these to match your real course; the dates and numbers here are sample values.",
+  "name": "Generative AI Literacy and Applications",
+  "code": "5602203",
+  "program": "BAScii",
+  "term": "Semester 1/2026",
+  "instructor": "Course instructor",
+  "students": 132,
+  "schedule": "Fri 13:00–16:00",
+  "room": "Classroom",
+  "current_week": 7,
+  "weeks": [
+    [1, "Intro to Generative AI", "9 Oct"],
+    [2, "Large Language Models", "16 Oct"],
+    [3, "Tokenization & Embeddings", "23 Oct"],
+    [4, "Transformers & Attention", "30 Oct"],
+    [5, "LLM Evaluation", "6 Nov"],
+    [6, "Prompt Engineering", "13 Nov"],
+    [7, "RAG & Vector Databases", "20 Nov"],
+    [8, "Midterm Exam", "27 Nov"],
+    [9, "Fine-tuning & LoRA", "4 Dec"],
+    [10, "Agents & Tool Use", "11 Dec"],
+    [11, "Multimodal Models", "18 Dec"],
+    [12, "Running Local Models with Ollama", "8 Jan"],
+    [13, "Safety, Bias & Responsible AI", "15 Jan"],
+    [14, "Project Workshop", "22 Jan"],
+    [15, "Final Project Presentations", "29 Jan"]
+  ],
+  "this_week": [
+    {"id": "read", "label": "Read: RAG & Vector Databases notes", "meta": "Week 7"},
+    {"id": "watch", "label": "Watch: a recommended RAG tutorial", "meta": "Library → Recommended"},
+    {"id": "assign", "label": "Assignment: RAG Practice", "meta": "Due Fri 20 Nov, 23:59"}
+  ],
+  "assessments": [
+    ["Assignment 1: Prompt Design", "Assignment", "23 Oct", "10%"],
+    ["Quiz 1: LLM Basics", "Quiz", "30 Oct", "5%"],
+    ["Quiz 2: Prompt Engineering", "Quiz", "15 Nov", "5%"],
+    ["Assignment 2: RAG Practice", "Assignment", "20 Nov, 23:59", "10%"],
+    ["Midterm Exam", "Exam", "27 Nov, 13:00", "20%"],
+    ["Final Project", "Project", "29 Jan", "35%"]
+  ]
+}
