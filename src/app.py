@@ -1,4 +1,4 @@
-"""Local Flask chat interface for Ollama."""
+"""GenieAi: a local study assistant for students and professors, powered by Ollama."""
 
 import json
 import socket
@@ -6,8 +6,10 @@ import sqlite3
 
 try:
     from .rag import Store, IndexError as RagError
+    from . import genie
 except ImportError:
     from rag import Store, IndexError as RagError
+    import genie
 from pathlib import Path
 from uuid import uuid4
 from urllib.error import HTTPError, URLError
@@ -20,6 +22,8 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024
 app.config["UPLOAD_FOLDER"] = Path(__file__).resolve().parent.parent / "uploads"
 app.config["INDEX_PATH"] = Path(__file__).resolve().parent.parent / "data" / "index.sqlite3"
+app.config["GENIE_PATH"] = Path(__file__).resolve().parent.parent / "data" / "genie.sqlite3"
+app.register_blueprint(genie.bp)
 
 
 def store():
@@ -135,6 +139,7 @@ def chat():
             return jsonify(error="Messages must alternate between user and assistant with non-empty text."), 400
     if messages[-1]["role"] != "user":
         return jsonify(error="The conversation must end with a user message."), 400
+    genie.record_topic(messages[-1]["content"])
 
     try:
         sources = store().search(messages[-1]["content"])
@@ -202,7 +207,19 @@ def index_documents():
 
 @app.get("/genieai")
 def genieai():
+    """Earlier GenieAi page (sample data; only its chat uses the local Ollama RAG)."""
     return render_template("genieai.html")
 
+
+@app.cli.command("seed-demo")
+def seed_demo_command():
+    """Add the sample course materials, announcements and questions for a demo."""
+    import click
+    copied, total = genie.seed_demo(app)
+    click.echo(f"Sample materials ready ({copied} new of {total}). Run index-documents next.")
+
+
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    import os
+    # macOS AirPlay Receiver often uses port 5000; set PORT=5001 to use another port.
+    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", "5000")), debug=False)

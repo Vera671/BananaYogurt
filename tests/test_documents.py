@@ -86,11 +86,11 @@ class DocumentTests(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertIn('permissions', response.json['error'])
 
-    def test_tabs_and_assets(self):
+    def test_page_and_assets(self):
         page = self.client.get('/').get_data(as_text=True)
-        for identifier in ('chat-tab', 'documents-tab', 'chat-panel', 'documents-panel', 'chat-form', 'upload-form'):
-            self.assertIn('id="' + identifier + '"', page)
-        with self.client.get('/static/documents.js') as response:
+        self.assertIn('id="root"', page)
+        self.assertIn('genie.js', page)
+        with self.client.get('/static/genie.js') as response:
             self.assertEqual(response.status_code, 200)
 
 

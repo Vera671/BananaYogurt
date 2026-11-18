@@ -136,6 +136,12 @@ class Store:
             db.execute('DELETE FROM chunks WHERE name=?', (name,))
             db.execute('DELETE FROM documents WHERE name=?', (name,))
 
+    def passages(self, name):
+        """Indexed passages of one document, in order: [(chunk, location, text)]."""
+        with LOCK, self.connect() as db:
+            return db.execute('SELECT number, location, text FROM chunks WHERE name=? ORDER BY number',
+                              (name,)).fetchall()
+
     def search(self, question):
         with LOCK:
             indexed, errors = self.sync()
